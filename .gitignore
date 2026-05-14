@@ -1,0 +1,35 @@
+# CubeIDE specific
+.settings/
+.cproject
+.project
+.mxproject
+*.code-workspace
+Debug/
+Release/
+build/
+
+# Generated files
+*.elf
+*.hex
+*.bin
+*.map
+*.o
+*.d
+
+# IDE/Editor files
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS specific
+.DS_Store
+Thumbs.db
+
+# Python cache (if using scripts)
+__pycache__/
+*.py[cod]
+
+# Temporary files
+*.tmp
+*.bak
