@@ -1,0 +1,10 @@
+../Src/main_uart.c:42:5:main	6
+../Src/main_uart.c:111:6:USER_GPIO_Init	1
+../Src/main_uart.c:120:6:USER_SystemClock_Config	3
+../Src/main_uart.c:135:16:USER_ReadBrakeState	2
+../Src/main_uart.c:140:16:USER_ClampPercentFromRaw	2
+../Src/main_uart.c:149:17:USER_ClampRpm	3
+../Src/main_uart.c:162:17:USER_ClampSpeed	3
+../Src/main_uart.c:175:13:USER_LCD_WritePadded	5
+../Src/main_uart.c:197:13:USER_LCD_UpdateStatus	1
+../Src/main_uart.c:213:13:USER_LCD_SimpleTest	1

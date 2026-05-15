@@ -1,0 +1,5 @@
+../Src/rt_nonfinite.c:18:6:rt_InitInfAndNaN	1
+../Src/rt_nonfinite.c:29:11:rtIsInf	3
+../Src/rt_nonfinite.c:34:11:rtIsInfF	3
+../Src/rt_nonfinite.c:39:11:rtIsNaN	9
+../Src/rt_nonfinite.c:78:11:rtIsNaNF	3

@@ -1,0 +1,3 @@
+../Src/user_timer.c:11:6:USER_TIM2_Init40ms	4	static
+../Src/user_timer.c:24:9:USER_TIM2_ConsumeTick	16	static
+../Src/user_timer.c:31:6:TIM2_IRQHandler	4	static

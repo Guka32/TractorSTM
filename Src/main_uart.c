@@ -27,6 +27,16 @@ static uint8_t USER_ReadBrakeState(void);
 static uint8_t USER_ClampPercentFromRaw(uint16_t rawValue);
 static uint16_t USER_ClampRpm(real_T rpmValue);
 static uint16_t USER_ClampSpeed(real_T speedValue);
+static void USER_LCD_WritePadded(uint8_t line, uint8_t column, const char *text, uint8_t fieldWidth);
+static void USER_LCD_UpdateStatus(uint16_t engineRpm, uint16_t vehicleSpeed, uint8_t gear);
+
+/* Debug globals for model tracing */
+volatile real_T USER_Debug_ModelEngineSpeed = 0.0;
+volatile real_T USER_Debug_ModelVehicleSpeed = 0.0;
+volatile real_T USER_Debug_ModelGear = 0.0;
+volatile uint16_t USER_Debug_ClampedEngineRpm = 0U;
+volatile uint16_t USER_Debug_ClampedVehicleSpeed = 0U;
+volatile uint8_t USER_Debug_ClampedGear = 0U;
 
 /* Superloop structure */
 int main(void)
@@ -62,13 +72,28 @@ uint16_t throttleRaw = USER_ADC1_ReadThrottleRaw( );
 uint8_t throttlePercent = USER_ClampPercentFromRaw(throttleRaw);
 uint8_t brakeActive = USER_ReadBrakeState( );
 
+/* Brake button acts as killswitch - zero out throttle when pressed */
+if (brakeActive != 0U) {
+    throttlePercent = 0U;
+}
+
 EngTrModel_U.Throttle = (real_T)throttlePercent;
 EngTrModel_U.BrakeTorque = (brakeActive != 0U) ? 100.0 : 0.0;
 EngTrModel_step( );
 
+/* Capture raw model outputs */
+USER_Debug_ModelEngineSpeed = EngTrModel_Y.EngineSpeed;
+USER_Debug_ModelVehicleSpeed = EngTrModel_Y.VehicleSpeed;
+USER_Debug_ModelGear = EngTrModel_Y.Gear;
+
 uint16_t engineRpm = USER_ClampRpm(EngTrModel_Y.EngineSpeed);
 uint16_t vehicleSpeed = USER_ClampSpeed(EngTrModel_Y.VehicleSpeed);
 uint8_t gear = (EngTrModel_Y.Gear <= 0.0) ? 0U : (uint8_t)(EngTrModel_Y.Gear + 0.5);
+
+/* Capture clamped values */
+USER_Debug_ClampedEngineRpm = engineRpm;
+USER_Debug_ClampedVehicleSpeed = vehicleSpeed;
+USER_Debug_ClampedGear = gear;
 uint8_t ledDuty = throttlePercent;  /* LEDs respond directly to potentiometer */
 
 USER_PWM4_SetDutyPercent(ledDuty);
@@ -76,16 +101,8 @@ USER_USART2_SendTelemetry(throttlePercent, brakeActive, engineRpm, vehicleSpeed,
 
 lcdTickDivider++;
 if (lcdTickDivider >= 5U) {
-char line1[24];
-char line2[24];
-
-lcdTickDivider = 0U;
-snprintf(line1, sizeof(line1), "RPM:%5u G:%u", engineRpm, gear);
-snprintf(line2, sizeof(line2), "SPD:%u THR:%u", vehicleSpeed, throttlePercent);
-LCD_Set_Cursor(1U, 1U);
-LCD_Put_Str(line1);
-LCD_Set_Cursor(2U, 1U);
-LCD_Put_Str(line2);
+		lcdTickDivider = 0U;
+		LCD_DiagnosticTest();  /* NEW: diagnostic test with specific characters */
 }
 }
 }
@@ -153,4 +170,62 @@ return 65535U;
 }
 
 return (uint16_t)(speedValue + 0.5);
+}
+
+static void USER_LCD_WritePadded(uint8_t line, uint8_t column, const char *text, uint8_t fieldWidth)
+{
+	char field[17];
+	uint8_t i = 0U;
+
+	if (fieldWidth > 16U) {
+		fieldWidth = 16U;
+	}
+
+	while ((i < fieldWidth) && (text[i] != '\0')) {
+		field[i] = text[i];
+		i++;
+	}
+	while (i < fieldWidth) {
+		field[i++] = ' ';
+	}
+	field[fieldWidth] = '\0';
+
+	LCD_Set_Cursor(line, column);
+	LCD_Put_Str(field);
+}
+
+static void USER_LCD_UpdateStatus(uint16_t engineRpm, uint16_t vehicleSpeed, uint8_t gear)
+{
+	char speedText[16];
+	char rpmText[16];
+	char gearText[16];
+
+	snprintf(speedText, sizeof speedText, "V:%u", (unsigned)vehicleSpeed);
+	snprintf(rpmText, sizeof rpmText, "RPM:%u", (unsigned)engineRpm);
+	snprintf(gearText, sizeof gearText, "G:%u", (unsigned)gear);
+
+	USER_LCD_WritePadded(1U, 1U, speedText, 8U);
+	USER_LCD_WritePadded(1U, 9U, rpmText, 8U);
+	USER_LCD_WritePadded(2U, 1U, gearText, 8U);
+	USER_LCD_WritePadded(2U, 9U, "", 8U);
+}
+
+static void USER_LCD_SimpleTest(void)
+{
+	/* Simple LCD test: write plain ASCII characters without snprintf */
+	LCD_Set_Cursor(1U, 1U);
+	LCD_Put_Char('A');
+	LCD_Put_Char('B');
+	LCD_Put_Char('C');
+	LCD_Put_Char('1');
+	LCD_Put_Char('2');
+	LCD_Put_Char('3');
+
+	LCD_Set_Cursor(2U, 1U);
+	LCD_Put_Char('X');
+	LCD_Put_Char('Y');
+	LCD_Put_Char('Z');
+	LCD_Put_Char('9');
+	LCD_Put_Char('8');
+	LCD_Put_Char('7');
 }

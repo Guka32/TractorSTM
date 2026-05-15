@@ -1,0 +1,8 @@
+../Src/user_uart.c:10:6:USER_GPIO_LED_Init	1
+../Src/user_uart.c:17:5:_write	3
+../Src/user_uart.c:27:6:USER_USART2_Init	1
+../Src/user_uart.c:50:6:USER_USART2_Transmit	2
+../Src/user_uart.c:56:13:USER_USART2_Send_8bit	2
+../Src/user_uart.c:62:9:USER_USART2_Receive_8bit	2
+../Src/user_uart.c:67:6:USER_USART2_SendString	2
+../Src/user_uart.c:76:6:USER_USART2_SendTelemetry	3

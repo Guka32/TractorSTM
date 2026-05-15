@@ -27,7 +27,7 @@ static void LCD_DelayUs(uint32_t microseconds)
 {
     if (g_dwt_enabled == 0U) LCD_DWT_Init();
     
-    uint32_t cycles_needed = (microseconds * 64U) / 1000U;  /* 64 MHz clock */
+    uint32_t cycles_needed = microseconds * 64U;  /* 64 cycles per microsecond at 64 MHz */
     uint32_t start_cycle = DWT_CYCCNT;
     
     while ((DWT_CYCCNT - start_cycle) < cycles_needed) {
@@ -60,41 +60,54 @@ void LCD_Pulse_EN(void)
     GPIOC->BSRR = LCD_EN_PIN_LOW;
     LCD_Delay_10us();
     GPIOC->BSRR = LCD_EN_PIN_HIGH;
-    LCD_Delay_10us();
+    LCD_Delay_100us();  /* Increased from 10us for data latch time */
     GPIOC->BSRR = LCD_EN_PIN_LOW;
     LCD_Delay_1ms();
 }
 
-/* Output 4 data bits (D4..D7) */
+/* Output 4 data bits (D4..D7) - atomically set/clear all bits */
 void LCD_Out_Data4(uint8_t val)
 {
-    if (val & 0x01U) GPIOC->BSRR = LCD_D4_PIN_HIGH; else GPIOC->BSRR = LCD_D4_PIN_LOW;
-    if (val & 0x02U) GPIOC->BSRR = LCD_D5_PIN_HIGH; else GPIOC->BSRR = LCD_D5_PIN_LOW;
-    if (val & 0x04U) GPIOC->BSRR = LCD_D6_PIN_HIGH; else GPIOC->BSRR = LCD_D6_PIN_LOW;
-    if (val & 0x08U) GPIOC->BSRR = LCD_D7_PIN_HIGH; else GPIOC->BSRR = LCD_D7_PIN_LOW;
+    uint32_t bsrr_val = 0UL;
+    
+    /* Build BSRR value to set/clear all 4 bits at once */
+    if (val & 0x01U) bsrr_val |= LCD_D4_PIN_HIGH; else bsrr_val |= LCD_D4_PIN_LOW;
+    if (val & 0x02U) bsrr_val |= LCD_D5_PIN_HIGH; else bsrr_val |= LCD_D5_PIN_LOW;
+    if (val & 0x04U) bsrr_val |= LCD_D6_PIN_HIGH; else bsrr_val |= LCD_D6_PIN_LOW;
+    if (val & 0x08U) bsrr_val |= LCD_D7_PIN_HIGH; else bsrr_val |= LCD_D7_PIN_LOW;
+    
+    /* Write to BSRR once with all bits */
+    GPIOC->BSRR = bsrr_val;
+    
+    LCD_DelayUs(1U);  /* Minimal setup time before EN pulse */
 }
 
 /* Write full byte (4-bit mode) */
 void LCD_Write_Byte(uint8_t val)
 {
     LCD_Out_Data4((val >> 4) & 0x0FU);
+    LCD_DelayUs(1U);  /* Setup time before EN pulse */
     LCD_Pulse_EN();
     LCD_Out_Data4(val & 0x0FU);
+    LCD_DelayUs(1U);  /* Setup time before EN pulse */
     LCD_Pulse_EN();
-    /* fixed small delay instead of busy-flag */
     LCD_Delay_1ms();
 }
 
 void LCD_Write_Cmd(uint8_t val)
 {
     GPIOC->BSRR = LCD_RS_PIN_LOW; /* command */
+    LCD_DelayUs(1U);  /* Setup time for RS */
     LCD_Write_Byte(val);
+    LCD_Delay_1ms();  /* Command execution time */
 }
 
 void LCD_Put_Char(uint8_t c)
 {
     GPIOC->BSRR = LCD_RS_PIN_HIGH; /* data */
+    LCD_DelayUs(1U);  /* Setup time for RS */
     LCD_Write_Byte(c);
+    LCD_Delay_1ms();  /* Character write time */
 }
 
 void LCD_Set_Cursor(uint8_t line, uint8_t column)
@@ -104,6 +117,7 @@ void LCD_Set_Cursor(uint8_t line, uint8_t column)
     column--; line--;
     address = (line * 0x40U) + column;
     LCD_Write_Cmd(0x80U | (address & 0x7FU));
+    LCD_Delay_1ms();  /* Cursor positioning time */
 }
 
 void LCD_Put_Str(char *str)
@@ -180,10 +194,33 @@ void LCD_Init(void)
     LCD_Write_Cmd(0x08); /* display off */
     LCD_Write_Cmd(0x01); /* clear */
     LCD_Write_Cmd(0x06); /* entry mode */
-    LCD_Write_Cmd(0x0F); /* display on, cursor blink */
+    LCD_Write_Cmd(0x0C); /* display on, cursor off */
 
-    /* Load user font into CGRAM (optional) */
-    LCD_Write_Cmd(0x40);
-    for (int i = 0; i < (int)sizeof(UserFont); ++i) LCD_Put_Char(((const char*)UserFont)[i]);
-    LCD_Write_Cmd(0x80);
+    /* User font not required for plain numeric/status output */
+}
+
+/* Diagnostic test: send specific ASCII values to identify bit ordering issues */
+void LCD_DiagnosticTest(void)
+{
+    /* Clear and home */
+    LCD_Write_Cmd(0x01);  /* Clear display */
+    LCD_Delay_40ms();     /* Clear needs more time */
+    
+    /* Line 1: Send same character 6 times to verify it's consistent */
+    LCD_Set_Cursor(1, 1);
+    LCD_Put_Char('A');    /* 0x41 */
+    LCD_Put_Char('A');
+    LCD_Put_Char('A');
+    LCD_Put_Char('A');
+    LCD_Put_Char('A');
+    LCD_Put_Char('A');
+    
+    /* Line 2: Send different character 6 times */
+    LCD_Set_Cursor(2, 1);
+    LCD_Put_Char('0');    /* 0x30 */
+    LCD_Put_Char('0');
+    LCD_Put_Char('0');
+    LCD_Put_Char('0');
+    LCD_Put_Char('0');
+    LCD_Put_Char('0');
 }

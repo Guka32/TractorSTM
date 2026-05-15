@@ -45,6 +45,7 @@ void LCD_Init(void);
 void LCD_Set_Cursor(uint8_t line, uint8_t column);
 void LCD_Put_Str(char * str);
 void LCD_Put_Num(int16_t num);
+void LCD_DiagnosticTest(void);
 char LCD_Busy(void);
 void LCD_Pulse_EN(void);
 void LCD_BarGraphic(int16_t value, int16_t size);
