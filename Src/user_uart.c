@@ -1,4 +1,4 @@
-﻿#include <stdint.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 #include "main.h"
@@ -79,7 +79,7 @@ char telemetryFrame[96];
 int written = snprintf(
 telemetryFrame,
 sizeof telemetryFrame,
-"TEL,THR=%u,BRAKE=%u,RPM=%u,VS=%u,GEAR=%u\r\n",
+"%u,%u,%u,%u,%u\r\n",
 (unsigned int)throttlePercent,
 (unsigned int)brakeActive,
 (unsigned int)engineRpm,

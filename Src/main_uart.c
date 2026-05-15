@@ -1,4 +1,4 @@
-﻿/**
+/**
  ******************************************************************************
  * @file           : main.c
  * @author         : Auto-generated for Motor Control Project
@@ -68,17 +68,38 @@ USER_USART2_SendString("====================================\r\n\r\n");
 for(;;){
 if (USER_TIM2_ConsumeTick() != 0U) {
 static uint8_t lcdTickDivider = 0U;
+static real_T currentThrottle = 0.0;
+static real_T currentBrake = 0.0;
+
 uint16_t throttleRaw = USER_ADC1_ReadThrottleRaw( );
-uint8_t throttlePercent = USER_ClampPercentFromRaw(throttleRaw);
+uint8_t targetThrottle = USER_ClampPercentFromRaw(throttleRaw);
 uint8_t brakeActive = USER_ReadBrakeState( );
 
-/* Brake button acts as killswitch - zero out throttle when pressed */
+/* Brake button logic: works like real life */
 if (brakeActive != 0U) {
-    throttlePercent = 0U;
+    currentThrottle -= 1.0; /* Drop throttle slowly */
+    if (currentThrottle < 0.0) {
+        currentThrottle = 0.0;
+    }
+    currentBrake += 2.0; /* Apply brakes smoothly */
+    if (currentBrake > 100.0) {
+        currentBrake = 100.0;
+    }
+} else {
+    currentThrottle = (real_T)targetThrottle; /* Go back to pot selected speed */
+    currentBrake = 0.0;
 }
 
-EngTrModel_U.Throttle = (real_T)throttlePercent;
-EngTrModel_U.BrakeTorque = (brakeActive != 0U) ? 100.0 : 0.0;
+uint8_t throttlePercent = (uint8_t)currentThrottle;
+
+/* Jumpstart logic: If the Simulink model stalled (RPM near 0) 
+   and the user gives throttle again, re-initialize to restart the engine */
+if (EngTrModel_Y.EngineSpeed < 50.0 && currentThrottle > 2.0) {
+    EngTrModel_initialize();
+}
+
+EngTrModel_U.Throttle = currentThrottle;
+EngTrModel_U.BrakeTorque = currentBrake;
 EngTrModel_step( );
 
 /* Capture raw model outputs */
@@ -102,7 +123,7 @@ USER_USART2_SendTelemetry(throttlePercent, brakeActive, engineRpm, vehicleSpeed,
 lcdTickDivider++;
 if (lcdTickDivider >= 5U) {
 		lcdTickDivider = 0U;
-		LCD_DiagnosticTest();  /* NEW: diagnostic test with specific characters */
+		USER_LCD_UpdateStatus(engineRpm, vehicleSpeed, gear);
 }
 }
 }

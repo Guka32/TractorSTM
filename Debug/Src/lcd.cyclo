@@ -18,4 +18,4 @@
 ../Src/lcd.c:145:6:LCD_BarGraphic	3
 ../Src/lcd.c:154:6:LCD_BarGraphicXY	4
 ../Src/lcd.c:164:6:LCD_Init	1
-../Src/lcd.c:203:6:LCD_DiagnosticTest	1
+../Src/lcd.c:207:6:LCD_DiagnosticTest	1

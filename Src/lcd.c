@@ -189,6 +189,10 @@ void LCD_Init(void)
     GPIOC->BSRR = LCD_D4_PIN_HIGH; GPIOC->BSRR = LCD_D5_PIN_HIGH; GPIOC->BSRR = LCD_D6_PIN_LOW; GPIOC->BSRR = LCD_D7_PIN_LOW; LCD_Pulse_EN();
     LCD_Delay_1ms();
 
+    /* Enter 4-bit mode (Send 0x02) */
+    GPIOC->BSRR = LCD_D4_PIN_LOW; GPIOC->BSRR = LCD_D5_PIN_HIGH; GPIOC->BSRR = LCD_D6_PIN_LOW; GPIOC->BSRR = LCD_D7_PIN_LOW; LCD_Pulse_EN();
+    LCD_Delay_1ms();
+
     /* Set 4-bit mode and function */
     LCD_Write_Cmd(0x28); /* 2-line, 5x7 */
     LCD_Write_Cmd(0x08); /* display off */
