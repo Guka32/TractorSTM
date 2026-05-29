@@ -1,0 +1,2 @@
+../Src/user_timer.c:12:6:USER_TIM2_Init40ms	4	static
+../Src/user_timer.c:25:6:TIM2_IRQHandler	16	static,ignoring_inline_asm
