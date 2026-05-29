@@ -1,0 +1,7 @@
+../Src/EngTrModel.c:49:8:look2_binlxpw	88	static
+../Src/EngTrModel.c:148:8:look1_binlxpw	56	static
+../Src/EngTrModel.c:204:13:EngTrModel_gear_state	16	static
+../Src/EngTrModel.c:251:8:rt_powd_snf	64	static
+../Src/EngTrModel.c:298:6:EngTrModel_step	64	static
+../Src/EngTrModel.c:487:6:EngTrModel_initialize	8	static
+../Src/EngTrModel.c:496:6:EngTrModel_terminate	4	static
