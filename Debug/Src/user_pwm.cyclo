@@ -1,0 +1,4 @@
+../Src/user_pwm.c:13:6:USER_PWM4_Init	1
+../Src/user_pwm.c:40:6:USER_PWM4_SetDutyPercent	1
+../Src/user_pwm.c:46:17:USER_PWM4_ClampDuty	2
+../Src/user_pwm.c:55:13:USER_PWM4_ApplyDuty	1

@@ -1,0 +1,10 @@
+../Src/main_uart.c:42:5:main	40	static,ignoring_inline_asm
+../Src/main_uart.c:132:6:USER_GPIO_Init	4	static
+../Src/main_uart.c:141:6:USER_SystemClock_Config	4	static
+../Src/main_uart.c:156:16:USER_ReadBrakeState	4	static
+../Src/main_uart.c:161:16:USER_ClampPercentFromRaw	16	static
+../Src/main_uart.c:170:17:USER_ClampRpm	16	static
+../Src/main_uart.c:183:17:USER_ClampSpeed	16	static
+../Src/main_uart.c:196:13:USER_LCD_WritePadded	40	static
+../Src/main_uart.c:218:13:USER_LCD_UpdateStatus	64	static
+../Src/main_uart.c:234:13:USER_LCD_SimpleTest	8	static

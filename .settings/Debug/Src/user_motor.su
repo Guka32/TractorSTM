@@ -1,0 +1,4 @@
+../Src/user_motor.c:22:6:USER_Motor_Init	4	static
+../Src/user_motor.c:37:6:USER_Motor_SetSpeed	16	static
+../Src/user_motor.c:52:6:USER_Motor_SetDirection	16	static
+../Src/user_motor.c:66:6:USER_Motor_Enable	16	static

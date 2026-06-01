@@ -1,0 +1,11 @@
+../Src/task_timing.c:99:6:TASK_TIMING_Init	1
+../Src/task_timing.c:135:6:TASK_TIMING_Start	1
+../Src/task_timing.c:140:10:TASK_TIMING_Stop	1
+../Src/task_timing.c:145:7:TASK_TIMING_TicksToUs	1
+../Src/task_timing.c:152:6:TASK_TIMING_RecordSample	5
+../Src/task_timing.c:186:6:TASK_TIMING_PrintCharacteristics	4
+../Src/task_timing.c:219:6:TASK_TIMING_PrintTimeline	6
+../Src/task_timing.c:260:6:TASK_TIMING_PrintSummary	3
+../Src/task_timing.c:304:6:TASK_TIMING_ResetAll	2
+../Src/task_timing.c:315:30:TASK_TIMING_GetCharacteristics	2
+../Src/task_timing.c:323:10:TASK_TIMING_GetSampleCount	2

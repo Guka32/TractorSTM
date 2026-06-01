@@ -1,0 +1,8 @@
+../Src/user_uart.c:10:6:USER_GPIO_LED_Init	4	static
+../Src/user_uart.c:17:5:_write	32	static
+../Src/user_uart.c:27:6:USER_USART2_Init	16	static
+../Src/user_uart.c:50:6:USER_USART2_Transmit	24	static
+../Src/user_uart.c:56:13:USER_USART2_Send_8bit	16	static
+../Src/user_uart.c:62:9:USER_USART2_Receive_8bit	4	static
+../Src/user_uart.c:67:6:USER_USART2_SendString	16	static
+../Src/user_uart.c:76:6:USER_USART2_SendTelemetry	144	static
