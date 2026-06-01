@@ -280,8 +280,9 @@ void TASK_TIMING_PrintSummary(void)
                    tasks[i].bcet_us);
             printf("│   - Average:              %lu µs                                                              │\n",
                    tasks[i].avg_us);
-            printf("│   - Utilization (U):      %.2f %%                                                             │\n",
-                   (float)tasks[i].wcet_us / (float)tasks[i].period_ms * 1000.0f);
+            uint32_t u_scaled = (tasks[i].wcet_us * 10000) / (tasks[i].period_ms * 1000);
+            printf("│   - Utilization (U):      %u.%02u %%                                                           │\n",
+                               (unsigned int)(u_scaled / 100), (unsigned int)(u_scaled % 100));
 
             total_wcet += tasks[i].wcet_us;
         }
@@ -289,8 +290,9 @@ void TASK_TIMING_PrintSummary(void)
 
     printf("│ %-88s │\n", " ");
     printf("│ CPU Utilization Analysis:                                                                     │\n");
-    printf("│   - Total U:               %.2f %%                                                             │\n",
-           (float)total_wcet / (float)hyperperiod_lcm * 100.0f);
+    uint32_t total_u_scaled = (total_wcet * 10000) / hyperperiod_lcm;
+    printf("│   - Total U:               %u.%02u %%                                                            │\n",
+           (unsigned int)(total_u_scaled / 100), (unsigned int)(total_u_scaled % 100));
     printf("│   - Hyperperiod:           %lu ms                                                              │\n",
            hyperperiod_lcm);
 

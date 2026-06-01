@@ -6,6 +6,6 @@
 ../Src/task_timing.c:186:6:TASK_TIMING_PrintCharacteristics	72	static
 ../Src/task_timing.c:219:6:TASK_TIMING_PrintTimeline	40	static
 ../Src/task_timing.c:260:6:TASK_TIMING_PrintSummary	32	static
-../Src/task_timing.c:304:6:TASK_TIMING_ResetAll	16	static
-../Src/task_timing.c:315:30:TASK_TIMING_GetCharacteristics	16	static
-../Src/task_timing.c:323:10:TASK_TIMING_GetSampleCount	16	static
+../Src/task_timing.c:306:6:TASK_TIMING_ResetAll	16	static
+../Src/task_timing.c:317:30:TASK_TIMING_GetCharacteristics	16	static
+../Src/task_timing.c:325:10:TASK_TIMING_GetSampleCount	16	static
