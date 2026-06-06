@@ -19,6 +19,12 @@ void USER_TIM2_Init40ms(void)
 	TIM2->DIER |= TIM_DIER_UIE;
 	TIM2->EGR = 1U;
 	TIM2->CR1 |= TIM_CR1_CEN;
+	
+	/* Set TIM2 interrupt priority to 5 via NVIC IPR register */
+	/* NVIC IPR base address: 0xE000E400, indexed by IRQn */
+	volatile uint8_t *nvic_ipr = (volatile uint8_t *)0xE000E400;
+	nvic_ipr[TIM2_IRQn] = (5U << 4U);
+	
 	NVIC_ISER0 |= (1UL << TIM2_IRQn);
 }
 

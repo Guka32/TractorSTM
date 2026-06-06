@@ -39,6 +39,7 @@
 ../Src/tasks.c:6440:17:uxTaskGetStackHighWaterMark	3
 ../Src/tasks.c:6473:17:prvDeleteTCB	1
 ../Src/tasks.c:6526:13:prvResetNextTaskUnblockTime	2
+../Src/tasks.c:6610:16:xTaskGetSchedulerState	3
 ../Src/tasks.c:7657:12:uxTaskResetEventItemValue	1
 ../Src/tasks.c:7702:14:ulTaskGenericNotifyTake	10
 ../Src/tasks.c:7804:16:xTaskGenericNotifyWait	10

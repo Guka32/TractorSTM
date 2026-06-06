@@ -1,46 +1,25 @@
 /* Minimal HD44780 4-bit driver adapted for Tractor project
- * Uses busy-flag disabled (RW assumed tied low) and DWT cycle counter for delays.
+ * Uses busy-flag disabled (RW assumed tied low) and FreeRTOS vTaskDelay for timing.
  */
 #include <stdint.h>
 #include "main.h"
 #include "lcd.h"
+#include "FreeRTOS.h"
+#include "task.h"
 
-/* DWT (Data Watchpoint and Trace) structures for cycle counter access */
-#define DWT_CYCCNT (*((volatile uint32_t *)0xE0001004U))
-#define DWT_CONTROL (*((volatile uint32_t *)0xE0001000U))
-#define DCB_DEMCR (*((volatile uint32_t *)0xE000EDFC))
-
-static volatile uint32_t g_dwt_enabled = 0U;
-
-/* Enable DWT cycle counter (called once) */
-static void LCD_DWT_Init(void)
-{
-    if (g_dwt_enabled != 0U) return;
-    
-    DCB_DEMCR |= (1UL << 24U);           /* Enable TRCENA */
-    DWT_CONTROL |= (1UL << 0U);          /* Enable CYCCNT */
-    g_dwt_enabled = 1U;
-}
-
-/* Non-blocking delay using DWT cycle counter (64 MHz = 15.625 ns per cycle) */
+/* Simple busy-wait for sub-millisecond delays (loops at 64 MHz) */
 static void LCD_DelayUs(uint32_t microseconds)
 {
-    if (g_dwt_enabled == 0U) LCD_DWT_Init();
-    
-    uint32_t cycles_needed = microseconds * 64U;  /* 64 cycles per microsecond at 64 MHz */
-    uint32_t start_cycle = DWT_CYCCNT;
-    
-    while ((DWT_CYCCNT - start_cycle) < cycles_needed) {
-        /* Yield to other code; not a busy-wait */
-    }
+	volatile uint32_t cycles = microseconds * 64U / 3U;  /* ~3 cycles per loop at -O0 */
+	while (cycles--);
 }
 
 static void LCD_Delay_10us(void)   { LCD_DelayUs(10U); }
 static void LCD_Delay_53us(void)   { LCD_DelayUs(53U); }
 static void LCD_Delay_100us(void)  { LCD_DelayUs(100U); }
-static void LCD_Delay_1ms(void)    { LCD_DelayUs(1000U); }
-static void LCD_Delay_4_1ms(void)  { LCD_DelayUs(4100U); }
-static void LCD_Delay_40ms(void)   { LCD_DelayUs(40000U); }
+static void LCD_Delay_1ms(void)    { if(xTaskGetSchedulerState() == taskSCHEDULER_RUNNING) vTaskDelay(pdMS_TO_TICKS(1)); else LCD_DelayUs(1000U); }
+static void LCD_Delay_4_1ms(void)  { if(xTaskGetSchedulerState() == taskSCHEDULER_RUNNING) vTaskDelay(pdMS_TO_TICKS(5)); else LCD_DelayUs(4100U); }  /* Rounded up for safety */
+static void LCD_Delay_40ms(void)   { if(xTaskGetSchedulerState() == taskSCHEDULER_RUNNING) vTaskDelay(pdMS_TO_TICKS(40)); else LCD_DelayUs(40000U); }
 
 /* Simple user font (kept from original) */
 const int8_t UserFont[8][8] = {
@@ -85,12 +64,15 @@ void LCD_Out_Data4(uint8_t val)
 /* Write full byte (4-bit mode) */
 void LCD_Write_Byte(uint8_t val)
 {
+    vTaskSuspendAll();
     LCD_Out_Data4((val >> 4) & 0x0FU);
     LCD_DelayUs(1U);  /* Setup time before EN pulse */
     LCD_Pulse_EN();
     LCD_Out_Data4(val & 0x0FU);
     LCD_DelayUs(1U);  /* Setup time before EN pulse */
     LCD_Pulse_EN();
+    xTaskResumeAll();
+    
     LCD_Delay_1ms();
 }
 
@@ -199,32 +181,8 @@ void LCD_Init(void)
     LCD_Write_Cmd(0x01); /* clear */
     LCD_Write_Cmd(0x06); /* entry mode */
     LCD_Write_Cmd(0x0C); /* display on, cursor off */
+    LCD_Write_Cmd(0x0C); /* display on, cursor off */
 
     /* User font not required for plain numeric/status output */
 }
 
-/* Diagnostic test: send specific ASCII values to identify bit ordering issues */
-void LCD_DiagnosticTest(void)
-{
-    /* Clear and home */
-    LCD_Write_Cmd(0x01);  /* Clear display */
-    LCD_Delay_40ms();     /* Clear needs more time */
-    
-    /* Line 1: Send same character 6 times to verify it's consistent */
-    LCD_Set_Cursor(1, 1);
-    LCD_Put_Char('A');    /* 0x41 */
-    LCD_Put_Char('A');
-    LCD_Put_Char('A');
-    LCD_Put_Char('A');
-    LCD_Put_Char('A');
-    LCD_Put_Char('A');
-    
-    /* Line 2: Send different character 6 times */
-    LCD_Set_Cursor(2, 1);
-    LCD_Put_Char('0');    /* 0x30 */
-    LCD_Put_Char('0');
-    LCD_Put_Char('0');
-    LCD_Put_Char('0');
-    LCD_Put_Char('0');
-    LCD_Put_Char('0');
-}

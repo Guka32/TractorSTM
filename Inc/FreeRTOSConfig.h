@@ -27,7 +27,7 @@
 #define configTICK_RATE_HZ						( ( TickType_t ) 1000 )
 #define configMAX_PRIORITIES					( 5 )
 #define configMINIMAL_STACK_SIZE				( ( unsigned short ) 128 )
-#define configTOTAL_HEAP_SIZE					( ( size_t ) ( 8192 ) )
+#define configTOTAL_HEAP_SIZE					( ( size_t ) ( 14336 ) )
 #define configMAX_TASK_NAME_LEN					( 16 )
 #define configUSE_TRACE_FACILITY				0
 #define configUSE_16_BIT_TICKS					0
@@ -72,7 +72,7 @@ to exclude the API function. */
 #define INCLUDE_vTaskDelayUntil					1
 #define INCLUDE_vTaskDelay						1
 #define INCLUDE_uxTaskGetStackHighWaterMark		1
-#define INCLUDE_xTaskGetSchedulerState			0
+#define INCLUDE_xTaskGetSchedulerState			1
 #define INCLUDE_xTaskGetCurrentTaskHandle		0
 #define INCLUDE_uxTaskGetStackHighWaterMark2	0
 

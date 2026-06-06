@@ -7,4 +7,3 @@
 ../Src/main_uart.c:136:17:USER_ClampSpeed	3
 ../Src/main_uart.c:149:13:USER_LCD_WritePadded	5
 ../Src/main_uart.c:171:13:USER_LCD_UpdateStatus	1
-../Src/main_uart.c:187:13:USER_LCD_SimpleTest	1

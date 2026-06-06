@@ -97,13 +97,15 @@ void vMotorTask(void *pvParameters);
 
 extern QueueHandle_t xThrottleQueue;	 /* uint8_t throttle % */
 extern QueueHandle_t xBrakeQueue;	 /* uint8_t brake (0 or 1) */
-extern QueueHandle_t xModelOutputQueue; /* ModelOutputs_T */
+extern QueueHandle_t xTelemetryOutputQueue; /* ModelOutputs_T for Telemetry */
+extern QueueHandle_t xLCDOutputQueue;       /* ModelOutputs_T for LCD */
 
 /* ============================================================================
  * Task Handles (for ISR notifications, etc.)
  * ============================================================================ */
 
 extern TaskHandle_t xControlTaskHandle;
+extern TaskHandle_t xADCTaskHandle;
 
 /* ============================================================================
  * Initialization Function

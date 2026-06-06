@@ -184,22 +184,3 @@ static void USER_LCD_UpdateStatus(uint16_t engineRpm, uint16_t vehicleSpeed, uin
 	USER_LCD_WritePadded(2U, 9U, "", 8U);
 }
 
-static void USER_LCD_SimpleTest(void)
-{
-	/* Simple LCD test: write plain ASCII characters without snprintf */
-	LCD_Set_Cursor(1U, 1U);
-	LCD_Put_Char('A');
-	LCD_Put_Char('B');
-	LCD_Put_Char('C');
-	LCD_Put_Char('1');
-	LCD_Put_Char('2');
-	LCD_Put_Char('3');
-
-	LCD_Set_Cursor(2U, 1U);
-	LCD_Put_Char('X');
-	LCD_Put_Char('Y');
-	LCD_Put_Char('Z');
-	LCD_Put_Char('9');
-	LCD_Put_Char('8');
-	LCD_Put_Char('7');
-}

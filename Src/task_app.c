@@ -1,5 +1,5 @@
 /*
- * tasks.c
+ * tasks_app.c
  * FreeRTOS task implementations for tractor control system
  */
 
@@ -22,8 +22,10 @@
 
 QueueHandle_t xThrottleQueue = NULL;
 QueueHandle_t xBrakeQueue = NULL;
-QueueHandle_t xModelOutputQueue = NULL;
+QueueHandle_t xTelemetryOutputQueue = NULL;
+QueueHandle_t xLCDOutputQueue = NULL;
 TaskHandle_t xControlTaskHandle = NULL;
+TaskHandle_t xADCTaskHandle = NULL;
 
 /* ============================================================================
  * Static Helper Functions
@@ -58,16 +60,13 @@ static real_T USER_SmoothThrottle(real_T currentThrottle, uint8_t targetThrottle
  */
 static real_T USER_SmoothBrake(real_T currentBrake, uint8_t brakeActive)
 {
-	if (brakeActive != 0U) {
-		currentBrake += 2.0;
-		if (currentBrake > 100.0) {
-			currentBrake = 100.0;
-		}
-	} else {
-		currentBrake = 0.0;
-	}
+	(void)currentBrake; /* Parameter kept for compatibility but no longer used for smoothing */
 	
-	return currentBrake;
+	if (brakeActive != 0U) {
+		return 100.0; /* Instantly apply 100% brake torque */
+	} else {
+		return 0.0;   /* Instantly release brake */
+	}
 }
 
 /**
@@ -104,8 +103,8 @@ void vControlTask(void *pvParameters)
 {
 	static real_T smoothedThrottle = 0.0;
 	static real_T smoothedBrake = 0.0;
-	uint8_t throttlePercent = 0U;
-	uint8_t brakeActive = 0U;
+	static uint8_t throttlePercent = 0U;
+	static uint8_t brakeActive = 0U;
 	ModelOutputs_T outputs;
 	
 	(void)pvParameters;  /* Unused parameter */
@@ -115,24 +114,23 @@ void vControlTask(void *pvParameters)
 		ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
 		
 		/* ===== Receive latest sensor values from queues ===== */
-		if (xQueueReceive(xThrottleQueue, &throttlePercent, 0) == pdFALSE) {
-			/* If no new throttle data, use 0 */
-			throttlePercent = 0U;
-		}
-		
-		if (xQueueReceive(xBrakeQueue, &brakeActive, 0) == pdFALSE) {
-			/* If no new brake data, use 0 */
-			brakeActive = 0U;
-		}
+		xQueueReceive(xThrottleQueue, &throttlePercent, 0);
+		xQueueReceive(xBrakeQueue, &brakeActive, 0);
 		
 		/* ===== Apply smoothing/ramping ===== */
-		smoothedThrottle = USER_SmoothThrottle(smoothedThrottle, throttlePercent);
-		smoothedBrake = USER_SmoothBrake(smoothedBrake, brakeActive);
+		if (brakeActive != 0U) {
+			/* Brake has priority: override throttle to idle (1.45%) */
+			smoothedThrottle = 1.45;
+			smoothedBrake = USER_SmoothBrake(smoothedBrake, brakeActive);
+		} else {
+			smoothedThrottle = USER_SmoothThrottle(smoothedThrottle, throttlePercent);
+			smoothedBrake = USER_SmoothBrake(smoothedBrake, brakeActive);
+		}
 		
-		/* ===== Jumpstart logic ===== */
-		/* Re-initialize model if stalled and throttle applied */
-		if (EngTrModel_Y.EngineSpeed < 50.0 && smoothedThrottle > 2.0) {
-			EngTrModel_initialize();
+		/* ===== Prevent Engine Stall ===== */
+		/* Force minimum RPM state to 1.0 to prevent the physics model from getting stuck at 0 */
+		if (EngTrModel_DW.DiscreteTimeIntegrator_DSTATE < 1.0) {
+			EngTrModel_DW.DiscreteTimeIntegrator_DSTATE = 1.0;
 		}
 		
 		/* ===== Set model inputs and execute step ===== */
@@ -150,8 +148,9 @@ void vControlTask(void *pvParameters)
 		outputs.throttlePercent = (uint8_t)smoothedThrottle;
 		outputs.brakeActive = brakeActive;
 		
-		/* ===== Send outputs to Telemetry task ===== */
-		xQueueSend(xModelOutputQueue, &outputs, 0);
+		/* ===== Send outputs to Telemetry and LCD tasks ===== */
+		xQueueOverwrite(xTelemetryOutputQueue, &outputs);
+		xQueueOverwrite(xLCDOutputQueue, &outputs);
 	}
 }
 
@@ -165,33 +164,36 @@ void vADCTask(void *pvParameters)
 {
 	TickType_t xLastWakeTime = xTaskGetTickCount();
 	uint16_t throttleRaw = 0U;
+	uint16_t lastThrottleRaw = 0U;
 	uint8_t throttlePercent = 0U;
 	uint8_t brakeState = 0U;
 	
 	(void)pvParameters;  /* Unused parameter */
 	
 	while (1) {
-		/* Wait ~40ms, aligned with Control task */
+		/* 40ms periodic execution */
 		vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(40));
 		
-		/* ===== Read throttle potentiometer (PA0) ===== */
+		/* Read latest ADC result (polls EOC) */
 		throttleRaw = USER_ADC1_ReadThrottleRaw();
 		
-		/* Convert raw ADC (0-4095) to percentage (0-100) */
-		throttlePercent = (uint8_t)((throttleRaw * 100U) / 4095U);
-		if (throttlePercent > 100U) {
-			throttlePercent = 100U;
+		/* Hysteresis: only update queue if change > 50 counts (~1.2% of 4095) */
+		if ((throttleRaw > (lastThrottleRaw + 50U)) || (throttleRaw < (lastThrottleRaw - 50U))) {
+			lastThrottleRaw = throttleRaw;
+			
+			/* Convert raw ADC (0-4095) to percentage (0-100) */
+			throttlePercent = (uint8_t)((throttleRaw * 100U) / 4095U);
+			if (throttlePercent > 100U) {
+				throttlePercent = 100U;
+			}
+			
+			/* Send to Control task queue (overwrite if not consumed) */
+			xQueueOverwrite(xThrottleQueue, &throttlePercent);
 		}
 		
-		/* Send to Control task queue (overwrite if not consumed) */
-		xQueueSend(xThrottleQueue, &throttlePercent, 0);
-		
-		/* ===== Read brake button (PC13, active low) ===== */
-		/* Assuming USER_ReadBrakeState() returns 1 when brake pressed */
+		/* ===== Read brake button (PC13, active low) every cycle ===== */
 		brakeState = (GPIOC->IDR & (1UL << 13U)) ? 0U : 1U;
-		
-		/* Send to Control task queue */
-		xQueueSend(xBrakeQueue, &brakeState, 0);
+		xQueueOverwrite(xBrakeQueue, &brakeState);
 	}
 }
 
@@ -210,7 +212,7 @@ void vTelemetryTask(void *pvParameters)
 	
 	while (1) {
 		/* Wait for model outputs (with 100ms timeout) */
-		if (xQueueReceive(xModelOutputQueue, &outputs, pdMS_TO_TICKS(100)) == pdTRUE) {
+		if (xQueueReceive(xTelemetryOutputQueue, &outputs, pdMS_TO_TICKS(100)) == pdTRUE) {
 			/* Clamp values to valid ranges */
 			engineRpm = USER_ClampRpm(outputs.engineSpeed);
 			vehicleSpeed = USER_ClampSpeed(outputs.vehicleSpeed);
@@ -248,29 +250,27 @@ void vLCDTask(void *pvParameters)
 		vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(40));
 		
 		/* ===== Try to get latest model outputs (non-blocking) ===== */
-		if (xQueueReceive(xModelOutputQueue, &outputs, 0) == pdTRUE) {
+		if (xQueueReceive(xLCDOutputQueue, &outputs, 0) == pdTRUE) {
 			engineRpm = USER_ClampRpm(outputs.engineSpeed);
 			vehicleSpeed = USER_ClampSpeed(outputs.vehicleSpeed);
 		}
 		
 		/* ===== Update LCD every 5th tick (200ms) ===== */
 		if ((tickCount % 5U) == 0U) {
-			/* Call LCD update function */
-			char speedText[8], rpmText[8], gearText[3];
+			/* Format display text and pad to clear old characters instead of sending clear command */
+			char line1[20], line2[20];
 			
-			snprintf(speedText, sizeof(speedText), "%3u km/h", vehicleSpeed);
-			snprintf(rpmText, sizeof(rpmText), "%4u RPM", engineRpm);
-			snprintf(gearText, sizeof(gearText), "G%u", outputs.gear);
+			uint16_t dispRpm = (engineRpm > 9999U) ? 9999U : engineRpm;
+			uint16_t dispSpeed = (vehicleSpeed > 99U) ? 99U : vehicleSpeed;
 			
-			/* Write to LCD using correct API: LCD_Set_Cursor + LCD_Put_Str */
-			LCD_Set_Cursor(1U, 0U);
-			LCD_Put_Str(speedText);
+			snprintf(line1, sizeof(line1), "SPD:%3u RPM:%04u", dispSpeed, dispRpm);
+			LCD_Set_Cursor(1U, 1U);
+			LCD_Put_Str(line1);
 			
-			LCD_Set_Cursor(1U, 10U);
-			LCD_Put_Str(rpmText);
-			
-			LCD_Set_Cursor(2U, 0U);
-			LCD_Put_Str(gearText);
+			/* Pad with spaces to clear any old characters to the right */
+			snprintf(line2, sizeof(line2), "Gear:%-11u", outputs.gear);
+			LCD_Set_Cursor(2U, 1U);
+			LCD_Put_Str(line2);
 		}
 		
 		tickCount++;
@@ -322,29 +322,32 @@ void vCreateAllTasks(void)
 	xBrakeQueue = xQueueCreate(1, sizeof(uint8_t));
 	configASSERT(xBrakeQueue != NULL);
 	
-	/* Model outputs queue: 1 ModelOutputs_T item */
-	xModelOutputQueue = xQueueCreate(1, sizeof(ModelOutputs_T));
-	configASSERT(xModelOutputQueue != NULL);
+	/* Model outputs queues: 1 ModelOutputs_T item each */
+	xTelemetryOutputQueue = xQueueCreate(1, sizeof(ModelOutputs_T));
+	configASSERT(xTelemetryOutputQueue != NULL);
+	
+	xLCDOutputQueue = xQueueCreate(1, sizeof(ModelOutputs_T));
+	configASSERT(xLCDOutputQueue != NULL);
 	
 	/* ===== Create Tasks ===== */
 	
-	/* Motor Task - Highest priority (5), will drive motor PWM in phase 2 */
+	/* Motor Task - Highest priority (4), will drive motor PWM in phase 2 */
 	xTaskCreate(
 		vMotorTask,
 		"Motor",
-		256,
+		128,
 		NULL,
-		5,
+		4,
 		NULL
 	);
 	
-	/* Control Task - High priority (4), 40ms model tick */
+	/* Control Task - High priority (3), 40ms model tick */
 	xTaskCreate(
 		vControlTask,
 		"Control",
 		512,
 		NULL,
-		4,
+		3,
 		&xControlTaskHandle
 	);
 	
@@ -352,17 +355,17 @@ void vCreateAllTasks(void)
 	xTaskCreate(
 		vADCTask,
 		"ADC",
-		256,
+		128,
 		NULL,
 		3,
-		NULL
+		&xADCTaskHandle
 	);
 	
 	/* Telemetry Task - Medium-Low priority (2), UART send */
 	xTaskCreate(
 		vTelemetryTask,
 		"Telemetry",
-		256,
+		512,
 		NULL,
 		2,
 		NULL
@@ -372,7 +375,7 @@ void vCreateAllTasks(void)
 	xTaskCreate(
 		vLCDTask,
 		"LCD",
-		256,
+		512,
 		NULL,
 		1,
 		NULL
@@ -381,5 +384,6 @@ void vCreateAllTasks(void)
 	/* ===== Queue Registry (for debugger) ===== */
 	vQueueAddToRegistry(xThrottleQueue, "ThrottleQ");
 	vQueueAddToRegistry(xBrakeQueue, "BrakeQ");
-	vQueueAddToRegistry(xModelOutputQueue, "ModelOutputQ");
+	vQueueAddToRegistry(xTelemetryOutputQueue, "TelemetryOutQ");
+	vQueueAddToRegistry(xLCDOutputQueue, "LCDOutQ");
 }

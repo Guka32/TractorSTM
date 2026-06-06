@@ -1,7 +1,7 @@
 ../Src/queue.c:303:12:xQueueGenericReset	32	static,ignoring_inline_asm
 ../Src/queue.c:502:19:xQueueGenericCreate	48	static,ignoring_inline_asm
 ../Src/queue.c:569:13:prvInitialiseNewQueue	24	static
-../Src/queue.c:949:12:xQueueGenericSend	56	static,ignoring_inline_asm
+../Src/queue.c:949:12:xQueueGenericSend	64	static,ignoring_inline_asm
 ../Src/queue.c:1167:12:xQueueGenericSendFromISR	72	static,ignoring_inline_asm
 ../Src/queue.c:1338:12:xQueueGiveFromISR	64	static,ignoring_inline_asm
 ../Src/queue.c:1509:12:xQueueReceive	56	static,ignoring_inline_asm
