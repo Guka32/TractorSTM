@@ -25,6 +25,14 @@ typedef struct {
 	uint8_t brakeActive;		/* 0 or 1 */
 } ModelOutputs_T;
 
+/* Structure for Remote Control Commands */
+typedef struct {
+	int mode;         /* 1: Teleop, 2: Distance */
+	float throttle;   /* Throttle percent */
+	float distance;   /* Distance to travel (m) */
+	int brake;        /* Brake active (1/0) */
+} RemoteCommand_T;
+
 /* ============================================================================
  * Task Function Declarations
  * ============================================================================ */
@@ -99,6 +107,7 @@ extern QueueHandle_t xThrottleQueue;	 /* uint8_t throttle % */
 extern QueueHandle_t xBrakeQueue;	 /* uint8_t brake (0 or 1) */
 extern QueueHandle_t xTelemetryOutputQueue; /* ModelOutputs_T for Telemetry */
 extern QueueHandle_t xLCDOutputQueue;       /* ModelOutputs_T for LCD */
+extern QueueHandle_t xRemoteQueue;          /* RemoteCommand_T from ESP32 */
 
 /* ============================================================================
  * Task Handles (for ISR notifications, etc.)

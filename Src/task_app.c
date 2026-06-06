@@ -14,7 +14,10 @@
 #include "user_adc.h"
 #include "user_pwm.h"
 #include "user_uart.h"
+#include "user_motor.h"
 #include "lcd.h"
+#include <stdlib.h>
+#include <string.h>
 
 /* ============================================================================
  * Queue and Task Handles (global)
@@ -24,6 +27,7 @@ QueueHandle_t xThrottleQueue = NULL;
 QueueHandle_t xBrakeQueue = NULL;
 QueueHandle_t xTelemetryOutputQueue = NULL;
 QueueHandle_t xLCDOutputQueue = NULL;
+QueueHandle_t xRemoteQueue = NULL;
 TaskHandle_t xControlTaskHandle = NULL;
 TaskHandle_t xADCTaskHandle = NULL;
 
@@ -103,8 +107,9 @@ void vControlTask(void *pvParameters)
 {
 	static real_T smoothedThrottle = 0.0;
 	static real_T smoothedBrake = 0.0;
-	static uint8_t throttlePercent = 0U;
-	static uint8_t brakeActive = 0U;
+	static uint8_t localThrottlePercent = 0U;
+	static uint8_t localBrakeActive = 0U;
+	RemoteCommand_T remoteCmd = {0};
 	ModelOutputs_T outputs;
 	
 	(void)pvParameters;  /* Unused parameter */
@@ -114,21 +119,30 @@ void vControlTask(void *pvParameters)
 		ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
 		
 		/* ===== Receive latest sensor values from queues ===== */
-		xQueueReceive(xThrottleQueue, &throttlePercent, 0);
-		xQueueReceive(xBrakeQueue, &brakeActive, 0);
+		xQueueReceive(xThrottleQueue, &localThrottlePercent, 0);
+		xQueueReceive(xBrakeQueue, &localBrakeActive, 0);
+		xQueuePeek(xRemoteQueue, &remoteCmd, 0);
+		
+		uint8_t activeThrottle = localThrottlePercent;
+		uint8_t activeBrake = localBrakeActive;
+		
+		/* If remote command is present and not mode 0, prefer remote */
+		if (remoteCmd.mode != 0) {
+			activeThrottle = (uint8_t)remoteCmd.throttle;
+			activeBrake = (uint8_t)remoteCmd.brake;
+		}
 		
 		/* ===== Apply smoothing/ramping ===== */
-		if (brakeActive != 0U) {
+		if (activeBrake != 0U) {
 			/* Brake has priority: override throttle to idle (1.45%) */
 			smoothedThrottle = 1.45;
-			smoothedBrake = USER_SmoothBrake(smoothedBrake, brakeActive);
+			smoothedBrake = USER_SmoothBrake(smoothedBrake, activeBrake);
 		} else {
-			smoothedThrottle = USER_SmoothThrottle(smoothedThrottle, throttlePercent);
-			smoothedBrake = USER_SmoothBrake(smoothedBrake, brakeActive);
+			smoothedThrottle = USER_SmoothThrottle(smoothedThrottle, activeThrottle);
+			smoothedBrake = USER_SmoothBrake(smoothedBrake, activeBrake);
 		}
 		
 		/* ===== Prevent Engine Stall ===== */
-		/* Force minimum RPM state to 1.0 to prevent the physics model from getting stuck at 0 */
 		if (EngTrModel_DW.DiscreteTimeIntegrator_DSTATE < 1.0) {
 			EngTrModel_DW.DiscreteTimeIntegrator_DSTATE = 1.0;
 		}
@@ -146,7 +160,7 @@ void vControlTask(void *pvParameters)
 		outputs.vehicleSpeed = EngTrModel_Y.VehicleSpeed;
 		outputs.gear = (EngTrModel_Y.Gear <= 0.0) ? 0U : (uint8_t)(EngTrModel_Y.Gear + 0.5);
 		outputs.throttlePercent = (uint8_t)smoothedThrottle;
-		outputs.brakeActive = brakeActive;
+		outputs.brakeActive = activeBrake;
 		
 		/* ===== Send outputs to Telemetry and LCD tasks ===== */
 		xQueueOverwrite(xTelemetryOutputQueue, &outputs);
@@ -286,18 +300,136 @@ void vLCDTask(void *pvParameters)
 void vMotorTask(void *pvParameters)
 {
 	TickType_t xLastWakeTime = xTaskGetTickCount();
+	RemoteCommand_T currentCmd = {0};
+	int16_t rightDelta = 0, leftDelta = 0;
+	
+	float currentDist = 0.0f;
+	float lastTargetDist = 0.0f;
+	float Kp = 10.0f; /* Proportional gain for distance */
+	float metersPerTick = 0.001f; /* Arbitrary scaling, adjust based on physical wheel size */
 	
 	(void)pvParameters;  /* Unused parameter */
 	
 	while (1) {
-		/* 10ms tick for motor control (will be used for encoder + PID in phase 2) */
+		/* 10ms tick for motor control (PID + kinematics) */
 		vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(10));
 		
-		/* Phase 2: TODO
-		 * - Read encoder feedback
-		 * - Compute PID outputs
-		 * - Update motor PWM
-		 */
+		/* Peek at latest remote command */
+		xQueuePeek(xRemoteQueue, &currentCmd, 0);
+		
+		/* Read Encoders */
+		USER_Motor_ReadEncoders(&rightDelta, &leftDelta);
+		
+		if (currentCmd.mode == 0) {
+			/* Local Control Mode (Default) */
+			uint8_t localBrake = 0;
+			uint8_t localThrottle = 0;
+			xQueuePeek(xBrakeQueue, &localBrake, 0);
+			xQueuePeek(xThrottleQueue, &localThrottle, 0);
+			
+			USER_Motor_Enable(1);
+			if (localBrake) {
+				USER_Motor_SetSpeed(MOTOR_FR, 0);
+				USER_Motor_SetSpeed(MOTOR_BR, 0);
+				USER_Motor_SetSpeed(MOTOR_FL, 0);
+				USER_Motor_SetSpeed(MOTOR_BL, 0);
+			} else {
+				int8_t spd = (int8_t)localThrottle;
+				USER_Motor_SetSpeed(MOTOR_FR, spd);
+				USER_Motor_SetSpeed(MOTOR_BR, spd);
+				USER_Motor_SetSpeed(MOTOR_FL, spd);
+				USER_Motor_SetSpeed(MOTOR_BL, spd);
+			}
+		} else {
+			/* Remote Control Mode */
+			USER_Motor_Enable(1);
+			
+			if (currentCmd.brake) {
+				USER_Motor_SetSpeed(MOTOR_FR, 0);
+				USER_Motor_SetSpeed(MOTOR_BR, 0);
+				USER_Motor_SetSpeed(MOTOR_FL, 0);
+				USER_Motor_SetSpeed(MOTOR_BL, 0);
+			} else if (currentCmd.mode == 1) {
+				/* Teleop throttle direct drive */
+				int8_t spd = (int8_t)currentCmd.throttle;
+				USER_Motor_SetSpeed(MOTOR_FR, spd);
+				USER_Motor_SetSpeed(MOTOR_BR, spd);
+				USER_Motor_SetSpeed(MOTOR_FL, spd);
+				USER_Motor_SetSpeed(MOTOR_BL, spd);
+			} else if (currentCmd.mode == 2) {
+				/* PID distance control */
+				if (currentCmd.distance != lastTargetDist) {
+					currentDist = 0.0f;
+					lastTargetDist = currentCmd.distance;
+				}
+				
+				float distStep = ((rightDelta + leftDelta) / 2.0f) * metersPerTick;
+				currentDist += distStep;
+				
+				float error = currentCmd.distance - currentDist;
+				float pOut = Kp * error;
+				
+				/* Simple heading hold: if one side moves faster, correct it */
+				float headingError = (rightDelta - leftDelta) * metersPerTick;
+				float turnComp = headingError * Kp * 2.0f;
+				
+				int16_t outR = (int16_t)(pOut - turnComp);
+				int16_t outL = (int16_t)(pOut + turnComp);
+				
+				if (outR > 100) outR = 100;
+				if (outR < -100) outR = -100;
+				if (outL > 100) outL = 100;
+				if (outL < -100) outL = -100;
+				
+				/* Stop if close enough to target (e.g. 1cm) */
+				if (error > -0.01f && error < 0.01f) {
+					outR = 0;
+					outL = 0;
+				}
+				
+				USER_Motor_SetSpeed(MOTOR_FR, (int8_t)outR);
+				USER_Motor_SetSpeed(MOTOR_BR, (int8_t)outR);
+				USER_Motor_SetSpeed(MOTOR_FL, (int8_t)outL);
+				USER_Motor_SetSpeed(MOTOR_BL, (int8_t)outL);
+			}
+		}
+	}
+}
+
+/**
+ * vRemoteTask - Parses ESP32 UART string
+ */
+void vRemoteTask(void *pvParameters)
+{
+	(void)pvParameters;
+	
+	while(1) {
+		if (USER_UART_RxReady) {
+			USER_UART_RxReady = 0;
+			char *p = USER_UART_RxBuffer;
+			RemoteCommand_T cmd = {0};
+			
+			cmd.mode = atoi(p);
+			while (*p && *p != ',') p++;
+			if (*p == ',') {
+				p++;
+				cmd.throttle = atof(p);
+				while (*p && *p != ',') p++;
+				if (*p == ',') {
+					p++;
+					cmd.distance = atof(p);
+					while (*p && *p != ',') p++;
+					if (*p == ',') {
+						p++;
+						cmd.brake = atoi(p);
+						
+						/* Send to remote queue */
+						xQueueOverwrite(xRemoteQueue, &cmd);
+					}
+				}
+			}
+		}
+		vTaskDelay(pdMS_TO_TICKS(10));
 	}
 }
 
@@ -328,6 +460,9 @@ void vCreateAllTasks(void)
 	
 	xLCDOutputQueue = xQueueCreate(1, sizeof(ModelOutputs_T));
 	configASSERT(xLCDOutputQueue != NULL);
+	
+	xRemoteQueue = xQueueCreate(1, sizeof(RemoteCommand_T));
+	configASSERT(xRemoteQueue != NULL);
 	
 	/* ===== Create Tasks ===== */
 	
@@ -381,9 +516,20 @@ void vCreateAllTasks(void)
 		NULL
 	);
 	
+	/* Remote Parse Task - High priority (3), 10ms poll */
+	xTaskCreate(
+		vRemoteTask,
+		"Remote",
+		512,
+		NULL,
+		3,
+		NULL
+	);
+	
 	/* ===== Queue Registry (for debugger) ===== */
 	vQueueAddToRegistry(xThrottleQueue, "ThrottleQ");
 	vQueueAddToRegistry(xBrakeQueue, "BrakeQ");
 	vQueueAddToRegistry(xTelemetryOutputQueue, "TelemetryOutQ");
 	vQueueAddToRegistry(xLCDOutputQueue, "LCDOutQ");
+	vQueueAddToRegistry(xRemoteQueue, "RemoteQ");
 }

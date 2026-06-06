@@ -7,46 +7,43 @@
  ******************************************************************************
  * @file       user_motor.h
  * @brief      Motor control driver for STM32F103RB
- * 
- * DESCRIPTION:
- * This header defines the interface for motor control functionality.
- * The motor control module will handle:
- *  - Motor initialization and GPIO setup
- *  - PWM speed control
- *  - Direction control (forward/reverse)
- *  - Motor enable/disable
- * 
- * TODO: Add motor specifications and implement motor control functions
- * ******************************************************************************
+ ******************************************************************************
  */
 
-/* Motor control function prototypes (to be implemented) */
+/* Motor Enums */
+typedef enum {
+    MOTOR_FR = 0,
+    MOTOR_BR,
+    MOTOR_FL,
+    MOTOR_BL,
+    MOTOR_COUNT
+} MotorID_t;
+
+/* Motor control function prototypes */
 
 /**
- * @brief Initialize motor control GPIO and PWM
- * @note To be implemented with motor specifications
+ * @brief Initialize motor control GPIO, PWM, and Encoder Timers
  */
 void USER_Motor_Init(void);
 
 /**
- * @brief Set motor speed (0-100%)
- * @param speed: Speed percentage (0-100)
- * @note To be implemented with motor specifications
+ * @brief Set motor speed (-100 to 100%)
+ * @param motor: Motor ID
+ * @param speed: Speed percentage (-100 to 100, where negative is reverse)
  */
-void USER_Motor_SetSpeed(uint8_t speed);
+void USER_Motor_SetSpeed(MotorID_t motor, int8_t speed);
 
 /**
- * @brief Set motor direction
- * @param direction: 1 for forward, 0 for reverse
- * @note To be implemented with motor specifications
- */
-void USER_Motor_SetDirection(uint8_t direction);
-
-/**
- * @brief Enable/disable motor
+ * @brief Enable/disable all motors via STBY pin
  * @param enable: 1 to enable, 0 to disable
- * @note To be implemented with motor specifications
  */
 void USER_Motor_Enable(uint8_t enable);
+
+/**
+ * @brief Read encoder delta since last call
+ * @param rightDelta: Pointer to store right side delta
+ * @param leftDelta: Pointer to store left side delta
+ */
+void USER_Motor_ReadEncoders(int16_t *rightDelta, int16_t *leftDelta);
 
 #endif /* USER_MOTOR_H_ */

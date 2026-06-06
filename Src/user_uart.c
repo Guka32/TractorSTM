@@ -34,6 +34,14 @@ USART2->BRR  = USARTDIV;//Step 5 Desired baud rate
 USART2->CR1|=  USART_CR1_TE;//Step 6 Transmitter enabled
 USART2->CR1|=  USART_CR1_RE;//Step 6b Receiver enabled
 
+/* Enable RXNE interrupt */
+USART2->CR1 |= (1UL << 5U);
+
+/* Configure NVIC for USART2 (IRQ 38) */
+volatile uint8_t *nvic_ipr = (volatile uint8_t *)0xE000E400;
+nvic_ipr[38] = (6U << 4U); /* Priority 6 */
+NVIC_ISER1 |= (1UL << (38 - 32));
+
 /* Configure PA2 (TX) as Alternate Function Output Push-Pull */
 uint32_t temp = GPIOA->CRL;
 temp &= ~( 0xFUL << (2U * 4U));//Clear PA2 bits
@@ -46,6 +54,7 @@ temp &= ~( 0xFUL << (3U * 4U));//Clear PA3 bits
 temp |= (0x4UL << (3U * 4U));//PA3 Floating Input (0x4 = mode 0, CNF 1)
 GPIOA->CRL = temp;
 }
+
 
 void USER_USART2_Transmit( uint8_t *pData, uint16_t size ){
 for( int i = 0; i < size; i++ ){
@@ -86,8 +95,31 @@ sizeof telemetryFrame,
 (unsigned int)vehicleSpeed,
 (unsigned int)gear);
 
-if (written > 0) {
-uint16_t frameSize = (written >= (int)sizeof telemetryFrame) ? (uint16_t)(sizeof telemetryFrame - 1U) : (uint16_t)written;
-USER_USART2_Transmit((uint8_t *)telemetryFrame, frameSize);
+	if (written > 0) {
+		uint16_t frameSize = (written >= (int)sizeof telemetryFrame) ? (uint16_t)(sizeof telemetryFrame - 1U) : (uint16_t)written;
+		USER_USART2_Transmit((uint8_t *)telemetryFrame, frameSize);
+	}
 }
+
+/* ISR for USART2 RX */
+char USER_UART_RxBuffer[64];
+volatile uint8_t USER_UART_RxReady = 0;
+static uint8_t rx_idx = 0;
+
+void USART2_IRQHandler(void)
+{
+	if (USART2->SR & USART_SR_RXNE) {
+		char c = (char)(USART2->DR & 0xFF);
+		if (c == '\n' || c == '\r') {
+			if (rx_idx > 0) {
+				USER_UART_RxBuffer[rx_idx] = '\0';
+				USER_UART_RxReady = 1;
+				rx_idx = 0;
+			}
+		} else {
+			if (rx_idx < sizeof(USER_UART_RxBuffer) - 1) {
+				USER_UART_RxBuffer[rx_idx++] = c;
+			}
+		}
+	}
 }

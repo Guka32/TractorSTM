@@ -21,4 +21,7 @@ void USER_GPIO_LED_Init( void );
 void USER_USART2_SendString(const char *text);
 void USER_USART2_SendTelemetry(uint16_t throttlePercent, uint8_t brakeActive, uint16_t engineRpm, uint16_t vehicleSpeed, uint8_t gear);
 
+extern char USER_UART_RxBuffer[64];
+extern volatile uint8_t USER_UART_RxReady;
+
 #endif /* USER_UART_H_ */
