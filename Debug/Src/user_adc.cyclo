@@ -1,0 +1,2 @@
+../Src/user_adc.c:17:6:USER_ADC1_Init	3
+../Src/user_adc.c:42:10:USER_ADC1_ReadThrottleRaw	2

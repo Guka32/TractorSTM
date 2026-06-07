@@ -1,0 +1,4 @@
+../Src/user_motor.c:37:6:USER_Motor_Init	1
+../Src/user_motor.c:94:6:USER_Motor_SetSpeed	15
+../Src/user_motor.c:138:6:USER_Motor_Enable	2
+../Src/user_motor.c:150:6:USER_Motor_ReadEncoders	3

@@ -1,0 +1,11 @@
+../Src/task_app.c:42:15:USER_SmoothThrottle	5
+../Src/task_app.c:65:15:USER_SmoothBrake	2
+../Src/task_app.c:79:17:USER_ClampRpm	3
+../Src/task_app.c:89:17:USER_ClampSpeed	3
+../Src/task_app.c:106:6:vControlTask	5
+../Src/task_app.c:177:6:vADCTask	4
+../Src/task_app.c:219:6:vTelemetryTask	2
+../Src/task_app.c:252:6:vLCDTask	3
+../Src/task_app.c:300:6:vMotorTask	13
+../Src/task_app.c:402:6:vRemoteTask	11
+../Src/task_app.c:445:6:vCreateAllTasks	6

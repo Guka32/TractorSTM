@@ -1,0 +1,4 @@
+../Src/user_pwm.c:13:6:USER_PWM4_Init	4	static
+../Src/user_pwm.c:40:6:USER_PWM4_SetDutyPercent	24	static
+../Src/user_pwm.c:46:17:USER_PWM4_ClampDuty	16	static
+../Src/user_pwm.c:55:13:USER_PWM4_ApplyDuty	16	static
