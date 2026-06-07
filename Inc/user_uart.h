@@ -20,6 +20,7 @@ uint8_t USER_USART2_Receive_8bit( void );
 void USER_GPIO_LED_Init( void );
 void USER_USART2_SendString(const char *text);
 void USER_USART2_SendTelemetry(uint16_t throttlePercent, uint8_t brakeActive, uint16_t engineRpm, uint16_t vehicleSpeed, uint8_t gear);
+void USER_USART2_EnableRX(void); /* Call ONLY after ESP32 UART cable is connected */
 
 extern char USER_UART_RxBuffer[64];
 extern volatile uint8_t USER_UART_RxReady;

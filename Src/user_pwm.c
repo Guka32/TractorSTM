@@ -54,8 +54,9 @@ static uint16_t USER_PWM4_ClampDuty(uint8_t dutyPercent)
 
 static void USER_PWM4_ApplyDuty(uint16_t compareValue)
 {
-	TIM3->CCR1 = compareValue;
-	TIM3->CCR2 = compareValue;
-	TIM3->CCR3 = compareValue;
-	TIM3->CCR4 = compareValue;
+	/* TIM3 CCR1-4 are exclusively controlled by user_motor.c (USER_Motor_SetSpeed).
+	 * Writing here would overwrite per-motor PWM values and cause all motors
+	 * to run at the same speed (the LED duty). This function is intentionally
+	 * left as a no-op. USER_PWM4_Init must still run to configure TIM3 + GPIO. */
+	(void)compareValue;
 }

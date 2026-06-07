@@ -31,28 +31,46 @@ USART2->CR1|= USART_CR1_UE;//Step 1 Usart enabled
 USART2->CR1&=~USART_CR1_M;//Step 2 8 Data bits
 USART2->CR2&=~USART_CR2_STOP;//Step 3 1 Stop bit
 USART2->BRR  = USARTDIV;//Step 5 Desired baud rate
-USART2->CR1|=  USART_CR1_TE;//Step 6 Transmitter enabled
-USART2->CR1|=  USART_CR1_RE;//Step 6b Receiver enabled
+	USART2->CR1|=  USART_CR1_TE;//Step 6 Transmitter enabled
+	USART2->CR1|=  USART_CR1_RE;//Step 6b Receiver enabled
 
-/* Enable RXNE interrupt */
-USART2->CR1 |= (1UL << 5U);
+	/* NOTE: RXNE interrupt is NOT enabled here.
+	 * It will be enabled by USER_USART2_EnableRX() once the UART cable
+	 * is physically connected to the ESP32. Without this, a floating
+	 * PA3 pin generates noise that corrupts the remote command queue. */
 
-/* Configure NVIC for USART2 (IRQ 38) */
-volatile uint8_t *nvic_ipr = (volatile uint8_t *)0xE000E400;
-nvic_ipr[38] = (6U << 4U); /* Priority 6 */
-NVIC_ISER1 |= (1UL << (38 - 32));
+	/* Configure PA2 (TX) as Alternate Function Output Push-Pull */
+	uint32_t temp = GPIOA->CRL;
+	temp &= ~( 0xFUL << (2U * 4U));//Clear PA2 bits
+	temp |= (0xAUL << (2U * 4U));//PA2 AF Push-Pull Output 10MHz (0xA)
+	GPIOA->CRL = temp;
 
-/* Configure PA2 (TX) as Alternate Function Output Push-Pull */
-uint32_t temp = GPIOA->CRL;
-temp &= ~( 0xFUL << (2U * 4U));//Clear PA2 bits
-temp |= (0xAUL << (2U * 4U));//PA2 AF Push-Pull Output 10MHz (0xA)
-GPIOA->CRL = temp;
+	/* Configure PA3 (RX) as Input with Pull-Down.
+	 * CNF = 10 (input with pull-up/pull-down), MODE = 00.
+	 * Setting ODR bit LOW selects pull-down.
+	 * This holds the line stable at 0 when no UART cable is connected
+	 * and prevents false RXNE interrupts from floating-pin noise. */
+	temp = GPIOA->CRL;
+	temp &= ~( 0xFUL << (3U * 4U)); /* Clear PA3 bits */
+	temp |= (0x8UL << (3U * 4U));  /* PA3: Input with pull (CNF=10, MODE=00) */
+	GPIOA->CRL = temp;
+	GPIOA->ODR &= ~(1UL << 3U);    /* Pull-DOWN: ODR bit = 0 */
+}
 
-/* Configure PA3 (RX) as Alternate Function Input Floating */
-temp = GPIOA->CRL;
-temp &= ~( 0xFUL << (3U * 4U));//Clear PA3 bits
-temp |= (0x4UL << (3U * 4U));//PA3 Floating Input (0x4 = mode 0, CNF 1)
-GPIOA->CRL = temp;
+/**
+ * @brief Enable UART2 RX interrupt.
+ * Call this only after the ESP32 UART cable has been physically connected.
+ * Calling it with a floating/unconnected PA3 will cause motor twitching.
+ */
+void USER_USART2_EnableRX(void)
+{
+	/* Enable RXNE interrupt */
+	USART2->CR1 |= (1UL << 5U); /* RXNEIE */
+
+	/* Configure NVIC for USART2 (IRQ 38) */
+	volatile uint8_t *nvic_ipr = (volatile uint8_t *)0xE000E400;
+	nvic_ipr[38] = (6U << 4U); /* Priority 6 */
+	NVIC_ISER1 |= (1UL << (38 - 32));
 }
 
 

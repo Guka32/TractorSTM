@@ -7,18 +7,56 @@
 #include "FreeRTOS.h"
 #include "task.h"
 
-/* Simple busy-wait for sub-millisecond delays (loops at 64 MHz) */
+/* --------------------------------------------------------------------------
+ * DWT Cycle-Counter based microsecond delay
+ *
+ * The ARM Cortex-M3 Data Watchpoint and Trace (DWT) unit has a free-running
+ * 32-bit cycle counter (DWT->CYCCNT) that increments every CPU clock cycle.
+ * At 64 MHz: 1 us = 64 cycles. This gives exact, optimizer-proof sub-us
+ * timing — unlike software loops which break at -O1 and above.
+ *
+ * Registers used:
+ *   CoreDebug->DEMCR  (0xE000EDFC) bit 24 – enables DWT trace
+ *   DWT->CTRL         (0xE0001000) bit 0  – enables CYCCNT
+ *   DWT->CYCCNT       (0xE0001004) – 32-bit cycle counter (wraps ~67s @ 64MHz)
+ * -------------------------------------------------------------------------- */
+
+#define DWT_CTRL   (*(volatile uint32_t *)0xE0001000U)
+#define DWT_CYCCNT (*(volatile uint32_t *)0xE0001004U)
+#define DEM_CR     (*(volatile uint32_t *)0xE000EDFCU)
+
+#define DEM_CR_TRCENA     (1UL << 24U)   /* Enable DWT trace */
+#define DWT_CR_CYCCNTENA  (1UL << 0U)    /* Enable cycle counter */
+
+#define LCD_CPU_HZ  64000000UL           /* Must match actual SYSCLK */
+
+/**
+ * @brief Enable the DWT cycle counter.
+ *        Call once before any LCD_DelayUs() call (LCD_Init does this).
+ */
+static void LCD_DWT_Init(void)
+{
+    DEM_CR    |= DEM_CR_TRCENA;    /* Unlock DWT */
+    DWT_CYCCNT = 0U;               /* Reset counter */
+    DWT_CTRL  |= DWT_CR_CYCCNTENA; /* Start counting */
+}
+
+/**
+ * @brief Busy-wait for 'microseconds' µs using DWT->CYCCNT.
+ *        Handles the 32-bit wrap-around correctly.
+ */
 static void LCD_DelayUs(uint32_t microseconds)
 {
-	volatile uint32_t cycles = microseconds * 64U / 3U;  /* ~3 cycles per loop at -O0 */
-	while (cycles--);
+    uint32_t ticks  = microseconds * (LCD_CPU_HZ / 1000000UL);
+    uint32_t tStart = DWT_CYCCNT;
+    while ((DWT_CYCCNT - tStart) < ticks);  /* Unsigned subtraction handles wrap */
 }
 
 static void LCD_Delay_10us(void)   { LCD_DelayUs(10U); }
 static void LCD_Delay_53us(void)   { LCD_DelayUs(53U); }
 static void LCD_Delay_100us(void)  { LCD_DelayUs(100U); }
 static void LCD_Delay_1ms(void)    { if(xTaskGetSchedulerState() == taskSCHEDULER_RUNNING) vTaskDelay(pdMS_TO_TICKS(1)); else LCD_DelayUs(1000U); }
-static void LCD_Delay_4_1ms(void)  { if(xTaskGetSchedulerState() == taskSCHEDULER_RUNNING) vTaskDelay(pdMS_TO_TICKS(5)); else LCD_DelayUs(4100U); }  /* Rounded up for safety */
+static void LCD_Delay_4_1ms(void)  { if(xTaskGetSchedulerState() == taskSCHEDULER_RUNNING) vTaskDelay(pdMS_TO_TICKS(5)); else LCD_DelayUs(4100U); }
 static void LCD_Delay_40ms(void)   { if(xTaskGetSchedulerState() == taskSCHEDULER_RUNNING) vTaskDelay(pdMS_TO_TICKS(40)); else LCD_DelayUs(40000U); }
 
 /* Simple user font (kept from original) */
@@ -145,6 +183,9 @@ void LCD_BarGraphicXY(int16_t pos_x, int16_t pos_y, int16_t value)
 /* Initialize LCD pins and bring interface up */
 void LCD_Init(void)
 {
+    /* Start DWT cycle counter — must be first so all delays below are accurate */
+    LCD_DWT_Init();
+
     /* Enable port C */
     RCC->APB2ENR |= (1UL << 4U);
     /* Configure PC6-PC12 as push-pull outputs, 10MHz (CRL/CRH) */

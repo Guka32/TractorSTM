@@ -118,9 +118,9 @@ void vControlTask(void *pvParameters)
 		/* ===== Wait for TIM2 notification (40ms tick) ===== */
 		ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
 		
-		/* ===== Receive latest sensor values from queues ===== */
-		xQueueReceive(xThrottleQueue, &localThrottlePercent, 0);
-		xQueueReceive(xBrakeQueue, &localBrakeActive, 0);
+		/* ===== Read latest sensor values (non-destructive: motor task also needs these) ===== */
+		xQueuePeek(xThrottleQueue, &localThrottlePercent, 0);
+		xQueuePeek(xBrakeQueue, &localBrakeActive, 0);
 		xQueuePeek(xRemoteQueue, &remoteCmd, 0);
 		
 		uint8_t activeThrottle = localThrottlePercent;
@@ -152,8 +152,9 @@ void vControlTask(void *pvParameters)
 		EngTrModel_U.BrakeTorque = smoothedBrake;
 		EngTrModel_step();
 		
-		/* ===== Update LED PWM (responds directly to throttle) ===== */
-		USER_PWM4_SetDutyPercent((uint8_t)smoothedThrottle);
+		/* NOTE: LED PWM removed - TIM3 CCR1-4 are owned by the motor driver.
+		 * Calling USER_PWM4_SetDutyPercent here would overwrite all 4 motor
+		 * PWM channels with the same value, causing the twitching/sync bug. */
 		
 		/* ===== Prepare output data ===== */
 		outputs.engineSpeed = EngTrModel_Y.EngineSpeed;
@@ -178,7 +179,6 @@ void vADCTask(void *pvParameters)
 {
 	TickType_t xLastWakeTime = xTaskGetTickCount();
 	uint16_t throttleRaw = 0U;
-	uint16_t lastThrottleRaw = 0U;
 	uint8_t throttlePercent = 0U;
 	uint8_t brakeState = 0U;
 	
@@ -190,21 +190,18 @@ void vADCTask(void *pvParameters)
 		
 		/* Read latest ADC result (polls EOC) */
 		throttleRaw = USER_ADC1_ReadThrottleRaw();
-		
-		/* Hysteresis: only update queue if change > 50 counts (~1.2% of 4095) */
-		if ((throttleRaw > (lastThrottleRaw + 50U)) || (throttleRaw < (lastThrottleRaw - 50U))) {
-			lastThrottleRaw = throttleRaw;
-			
-			/* Convert raw ADC (0-4095) to percentage (0-100) */
-			throttlePercent = (uint8_t)((throttleRaw * 100U) / 4095U);
-			if (throttlePercent > 100U) {
-				throttlePercent = 100U;
-			}
-			
-			/* Send to Control task queue (overwrite if not consumed) */
-			xQueueOverwrite(xThrottleQueue, &throttlePercent);
+
+		/* Always write throttle every cycle so the queue is never empty.
+		 * vControlTask and vMotorTask both peek this queue - if it were only
+		 * written on change (hysteresis), a steady pot would leave the queue
+		 * empty and both tasks would read 0. Smoothing in vControlTask handles
+		 * noise suppression for the model. */
+		throttlePercent = (uint8_t)((throttleRaw * 100U) / 4095U);
+		if (throttlePercent > 100U) {
+			throttlePercent = 100U;
 		}
-		
+		xQueueOverwrite(xThrottleQueue, &throttlePercent);
+
 		/* ===== Read brake button (PC13, active low) every cycle ===== */
 		brakeState = (GPIOC->IDR & (1UL << 13U)) ? 0U : 1U;
 		xQueueOverwrite(xBrakeQueue, &brakeState);
@@ -321,19 +318,24 @@ void vMotorTask(void *pvParameters)
 		USER_Motor_ReadEncoders(&rightDelta, &leftDelta);
 		
 		if (currentCmd.mode == 0) {
-			/* Local Control Mode (Default) */
+			/* ===== Local Control Mode (Default) ===== */
 			uint8_t localBrake = 0;
 			uint8_t localThrottle = 0;
 			xQueuePeek(xBrakeQueue, &localBrake, 0);
 			xQueuePeek(xThrottleQueue, &localThrottle, 0);
-			
-			USER_Motor_Enable(1);
-			if (localBrake) {
+
+			if (localBrake || localThrottle == 0U) {
+				/* Brake pressed OR throttle is zero:
+				 * Pull STBY LOW so both TB6612 drivers go into standby.
+				 * This cuts power to both H-bridges and stops all twitching. */
 				USER_Motor_SetSpeed(MOTOR_FR, 0);
 				USER_Motor_SetSpeed(MOTOR_BR, 0);
 				USER_Motor_SetSpeed(MOTOR_FL, 0);
 				USER_Motor_SetSpeed(MOTOR_BL, 0);
+				USER_Motor_Enable(0); /* STBY = LOW */
 			} else {
+				/* Throttle > 0: enable drivers and set speed */
+				USER_Motor_Enable(1); /* STBY = HIGH */
 				int8_t spd = (int8_t)localThrottle;
 				USER_Motor_SetSpeed(MOTOR_FR, spd);
 				USER_Motor_SetSpeed(MOTOR_BR, spd);
@@ -341,56 +343,66 @@ void vMotorTask(void *pvParameters)
 				USER_Motor_SetSpeed(MOTOR_BL, spd);
 			}
 		} else {
-			/* Remote Control Mode */
-			USER_Motor_Enable(1);
-			
+			/* ===== Remote Control Mode ===== */
 			if (currentCmd.brake) {
+				/* Brake: zero PWM first, then disable drivers */
 				USER_Motor_SetSpeed(MOTOR_FR, 0);
 				USER_Motor_SetSpeed(MOTOR_BR, 0);
 				USER_Motor_SetSpeed(MOTOR_FL, 0);
 				USER_Motor_SetSpeed(MOTOR_BL, 0);
+				USER_Motor_Enable(0); /* STBY = LOW */
 			} else if (currentCmd.mode == 1) {
 				/* Teleop throttle direct drive */
 				int8_t spd = (int8_t)currentCmd.throttle;
-				USER_Motor_SetSpeed(MOTOR_FR, spd);
-				USER_Motor_SetSpeed(MOTOR_BR, spd);
-				USER_Motor_SetSpeed(MOTOR_FL, spd);
-				USER_Motor_SetSpeed(MOTOR_BL, spd);
+				if (spd == 0) {
+					USER_Motor_Enable(0);
+				} else {
+					USER_Motor_Enable(1);
+					USER_Motor_SetSpeed(MOTOR_FR, spd);
+					USER_Motor_SetSpeed(MOTOR_BR, spd);
+					USER_Motor_SetSpeed(MOTOR_FL, spd);
+					USER_Motor_SetSpeed(MOTOR_BL, spd);
+				}
 			} else if (currentCmd.mode == 2) {
 				/* PID distance control */
 				if (currentCmd.distance != lastTargetDist) {
 					currentDist = 0.0f;
 					lastTargetDist = currentCmd.distance;
 				}
-				
+
 				float distStep = ((rightDelta + leftDelta) / 2.0f) * metersPerTick;
 				currentDist += distStep;
-				
+
 				float error = currentCmd.distance - currentDist;
 				float pOut = Kp * error;
-				
+
 				/* Simple heading hold: if one side moves faster, correct it */
 				float headingError = (rightDelta - leftDelta) * metersPerTick;
 				float turnComp = headingError * Kp * 2.0f;
-				
+
 				int16_t outR = (int16_t)(pOut - turnComp);
 				int16_t outL = (int16_t)(pOut + turnComp);
-				
+
 				if (outR > 100) outR = 100;
 				if (outR < -100) outR = -100;
 				if (outL > 100) outL = 100;
 				if (outL < -100) outL = -100;
-				
+
 				/* Stop if close enough to target (e.g. 1cm) */
 				if (error > -0.01f && error < 0.01f) {
 					outR = 0;
 					outL = 0;
 				}
-				
-				USER_Motor_SetSpeed(MOTOR_FR, (int8_t)outR);
-				USER_Motor_SetSpeed(MOTOR_BR, (int8_t)outR);
-				USER_Motor_SetSpeed(MOTOR_FL, (int8_t)outL);
-				USER_Motor_SetSpeed(MOTOR_BL, (int8_t)outL);
+
+				if (outR == 0 && outL == 0) {
+					USER_Motor_Enable(0); /* Target reached: standby */
+				} else {
+					USER_Motor_Enable(1);
+					USER_Motor_SetSpeed(MOTOR_FR, (int8_t)outR);
+					USER_Motor_SetSpeed(MOTOR_BR, (int8_t)outR);
+					USER_Motor_SetSpeed(MOTOR_FL, (int8_t)outL);
+					USER_Motor_SetSpeed(MOTOR_BL, (int8_t)outL);
+				}
 			}
 		}
 	}
