@@ -49,6 +49,7 @@ int main(void)
 	USER_GPIO_Init( );
 	USER_GPIO_LED_Init( );
 	USER_USART3_Init( );
+	USER_USART2_Init( );
 	USER_ADC1_Init( );
 	USER_PWM4_Init( );
 	USER_TIM2_Init40ms( );

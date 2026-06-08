@@ -18,8 +18,8 @@ int _write(int file, char *ptr, int len){
 (void)file;
 int DataIdx;
 for(DataIdx=0; DataIdx<len; DataIdx++){
-while(!( USART3->SR & USART_SR_TXE ));
-USART3->DR = *ptr++;
+while(!( USART2->SR & USART_SR_TXE ));
+USART2->DR = *ptr++;
 }
 return len;
 }
@@ -73,6 +73,34 @@ while(!( USART3->SR & USART_SR_RXNE ));//wait until a data is received (RXNE fla
 return (uint8_t)(USART3->DR & 0xFF);//return data (DR register)
 }
 
+void USER_USART2_Init( void ){
+RCC->APB1ENR|= ( 0x1UL << 17U );//USART2 clock enable
+RCC->APB2ENR|= ( 0x1UL <<  2U );//IO port A clock enable
+USART2->CR1|= USART_CR1_UE;//Step 1 Usart enabled
+USART2->CR1&=~USART_CR1_M;//Step 2 8 Data bits
+USART2->CR2&=~USART_CR2_STOP;//Step 3 1 Stop bit
+USART2->BRR  = USARTDIV;//Step 5 Desired baud rate
+USART2->CR1|=  USART_CR1_TE;//Step 6 Transmitter enabled
+USART2->CR1|=  USART_CR1_RE;//Step 6b Receiver enabled
+
+/* Configure PA2 (TX) as Alternate Function Output Push-Pull */
+uint32_t temp = GPIOA->CRL;
+temp &= ~( 0xFUL << (2U * 4U));//Clear PA2 bits
+temp |= (0xAUL << (2U * 4U));//PA2 AF Push-Pull Output 10MHz (0xA)
+GPIOA->CRL = temp;
+
+/* Configure PA3 (RX) as Alternate Function Input Floating */
+temp = GPIOA->CRL;
+temp &= ~( 0xFUL << (3U * 4U));//Clear PA3 bits
+temp |= (0x4UL << (3U * 4U));//PA3 Floating Input (0x4 = mode 0, CNF 1)
+GPIOA->CRL = temp;
+}
+
+void USER_USART2_Send_8bit( uint8_t Data ){
+while(!( USART2->SR & USART_SR_TXE ));//wait until next data can be written
+USART2->DR = Data;//Step 7 Data to send
+}
+
 void USER_USART3_SendString(const char *text)
 {
 if (text == NULL) {
@@ -110,6 +138,8 @@ void USART3_IRQHandler(void)
 {
 	if (USART3->SR & USART_SR_RXNE) {
 		char c = (char)(USART3->DR & 0xFF);
+		/* Echo received character to UART2 for debugging */
+		USER_USART2_Send_8bit((uint8_t)c);
 		if (c == '\n' || c == '\r') {
 			if (rx_idx > 0) {
 				USER_UART_RxBuffer[rx_idx] = '\0';

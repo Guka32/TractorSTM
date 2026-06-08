@@ -20,6 +20,8 @@ uint8_t USER_USART3_Receive_8bit( void );
 void USER_GPIO_LED_Init( void );
 void USER_USART3_SendString(const char *text);
 void USER_USART3_SendTelemetry(uint16_t throttlePercent, uint8_t brakeActive, uint16_t engineRpm, uint16_t vehicleSpeed, uint8_t gear);
+void USER_USART2_Init( void );
+void USER_USART2_Send_8bit( uint8_t Data );
 
 extern char USER_UART_RxBuffer[64];
 extern volatile uint8_t USER_UART_RxReady;

@@ -4,6 +4,8 @@
 ../Src/user_uart.c:59:6:USER_USART3_Transmit	2
 ../Src/user_uart.c:65:13:USER_USART3_Send_8bit	2
 ../Src/user_uart.c:71:9:USER_USART3_Receive_8bit	2
-../Src/user_uart.c:76:6:USER_USART3_SendString	2
-../Src/user_uart.c:85:6:USER_USART3_SendTelemetry	3
-../Src/user_uart.c:109:6:USART3_IRQHandler	6
+../Src/user_uart.c:76:6:USER_USART2_Init	1
+../Src/user_uart.c:99:6:USER_USART2_Send_8bit	2
+../Src/user_uart.c:104:6:USER_USART3_SendString	2
+../Src/user_uart.c:113:6:USER_USART3_SendTelemetry	3
+../Src/user_uart.c:137:6:USART3_IRQHandler	6
