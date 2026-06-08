@@ -126,6 +126,7 @@ typedef struct
 #define ADC1_BASE	0x40012400UL//		ADC1 base address
 #define USART1_BASE	0x40013800UL//		USART1 base address
 #define USART2_BASE	0x40004400UL//		USART2 base address
+#define USART3_BASE	0x40004800UL//		USART3 base address
 #define TIM2_BASE	0x40000000UL//		TIM2 base address
 #define TIM3_BASE	0x40000400UL//		TIM3 base address
 #define TIM4_BASE	0x40000800UL//		TIM4 base address
@@ -140,6 +141,7 @@ typedef struct
 #define ADC1		(( ADC_TypeDef *)ADC1_BASE )//	ADC1 base address points to ADC structure
 #define USART1		(( USART_TypeDef *)USART1_BASE )//	USART1 base address points to USART structure
 #define USART2		(( USART_TypeDef *)USART2_BASE )//	USART2 base address points to USART structure
+#define USART3		(( USART_TypeDef *)USART3_BASE )//	USART3 base address points to USART structure
 #define TIM2		(( TIM_TypeDef *)TIM2_BASE )//	TIM2 base address points to timer structure
 #define TIM3		(( TIM_TypeDef *)TIM3_BASE )//	TIM3 base address points to timer structure
 #define TIM4		(( TIM_TypeDef *)TIM4_BASE )//	TIM4 base address points to timer structure

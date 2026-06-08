@@ -231,8 +231,8 @@ void vTelemetryTask(void *pvParameters)
 			engineRpm = USER_ClampRpm(outputs.engineSpeed);
 			vehicleSpeed = USER_ClampSpeed(outputs.vehicleSpeed);
 			
-			/* Send telemetry via UART2 */
-			USER_USART2_SendTelemetry(
+			/* Send telemetry via USART3 */
+			USER_USART3_SendTelemetry(
 				outputs.throttlePercent,
 				outputs.brakeActive,
 				engineRpm,

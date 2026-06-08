@@ -35,17 +35,17 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY, DEBUGGING, OCTETS
  15 .debug_rnglists 0000063a  00000000  00000000  000184d0  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 16 .debug_macro  000063a8  00000000  00000000  00018b0a  2**0
+ 16 .debug_macro  000063b6  00000000  00000000  00018b0a  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 17 .debug_line   0000aff9  00000000  00000000  0001eeb2  2**0
+ 17 .debug_line   0000aff9  00000000  00000000  0001eec0  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 18 .debug_str    0001a7bd  00000000  00000000  00029eab  2**0
+ 18 .debug_str    0001a7fe  00000000  00000000  00029eb9  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 19 .comment      00000043  00000000  00000000  00044668  2**0
+ 19 .comment      00000043  00000000  00000000  000446b7  2**0
                   CONTENTS, READONLY
- 20 .debug_frame  00003550  00000000  00000000  000446ac  2**2
+ 20 .debug_frame  00003550  00000000  00000000  000446fc  2**2
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 21 .debug_line_str 0000005a  00000000  00000000  00047bfc  2**0
+ 21 .debug_line_str 0000005a  00000000  00000000  00047c4c  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
 
 Disassembly of section .text:
@@ -5184,8 +5184,8 @@ int main(void)
  8002b14:	f000 f834 	bl	8002b80 <USER_GPIO_Init>
 	USER_GPIO_LED_Init( );
  8002b18:	f003 fd58 	bl	80065cc <USER_GPIO_LED_Init>
-	USER_USART2_Init( );
- 8002b1c:	f003 fd98 	bl	8006650 <USER_USART2_Init>
+	USER_USART3_Init( );
+ 8002b1c:	f003 fd98 	bl	8006650 <USER_USART3_Init>
 	USER_ADC1_Init( );
  8002b20:	f003 fa2c 	bl	8005f7c <USER_ADC1_Init>
 	USER_PWM4_Init( );
@@ -5204,24 +5204,24 @@ int main(void)
 	__asm volatile ("cpsie i");
  8002b38:	b662      	cpsie	i
 
-	USER_USART2_SendString("====================================\r\n");
+	USER_USART3_SendString("====================================\r\n");
  8002b3a:	480c      	ldr	r0, [pc, #48]	@ (8002b6c <main+0x60>)
- 8002b3c:	f003 fe28 	bl	8006790 <USER_USART2_SendString>
-	USER_USART2_SendString("TRANSMISSION CONTROL SYSTEM - STM32F103RB\r\n");
+ 8002b3c:	f003 fe28 	bl	8006790 <USER_USART3_SendString>
+	USER_USART3_SendString("TRANSMISSION CONTROL SYSTEM - STM32F103RB\r\n");
  8002b40:	480b      	ldr	r0, [pc, #44]	@ (8002b70 <main+0x64>)
- 8002b42:	f003 fe25 	bl	8006790 <USER_USART2_SendString>
-	USER_USART2_SendString("====================================\r\n");
+ 8002b42:	f003 fe25 	bl	8006790 <USER_USART3_SendString>
+	USER_USART3_SendString("====================================\r\n");
  8002b46:	4809      	ldr	r0, [pc, #36]	@ (8002b6c <main+0x60>)
- 8002b48:	f003 fe22 	bl	8006790 <USER_USART2_SendString>
-	USER_USART2_SendString("System initialized successfully!\r\n");
+ 8002b48:	f003 fe22 	bl	8006790 <USER_USART3_SendString>
+	USER_USART3_SendString("System initialized successfully!\r\n");
  8002b4c:	4809      	ldr	r0, [pc, #36]	@ (8002b74 <main+0x68>)
- 8002b4e:	f003 fe1f 	bl	8006790 <USER_USART2_SendString>
-	USER_USART2_SendString("Ready for FreeRTOS-based control loop.\r\n");
+ 8002b4e:	f003 fe1f 	bl	8006790 <USER_USART3_SendString>
+	USER_USART3_SendString("Ready for FreeRTOS-based control loop.\r\n");
  8002b52:	4809      	ldr	r0, [pc, #36]	@ (8002b78 <main+0x6c>)
- 8002b54:	f003 fe1c 	bl	8006790 <USER_USART2_SendString>
-	USER_USART2_SendString("====================================\r\n\r\n");
+ 8002b54:	f003 fe1c 	bl	8006790 <USER_USART3_SendString>
+	USER_USART3_SendString("====================================\r\n\r\n");
  8002b58:	4808      	ldr	r0, [pc, #32]	@ (8002b7c <main+0x70>)
- 8002b5a:	f003 fe19 	bl	8006790 <USER_USART2_SendString>
+ 8002b5a:	f003 fe19 	bl	8006790 <USER_USART3_SendString>
 
 	/* ===== FreeRTOS Task Creation ===== */
 	vCreateAllTasks();
@@ -9642,11 +9642,11 @@ void vTelemetryTask(void *pvParameters)
  800446a:	4603      	mov	r3, r0
  800446c:	84bb      	strh	r3, [r7, #36]	@ 0x24
 			
-			/* Send telemetry via UART2 */
-			USER_USART2_SendTelemetry(
+			/* Send telemetry via USART3 */
+			USER_USART3_SendTelemetry(
 				outputs.throttlePercent,
  800446e:	7e7b      	ldrb	r3, [r7, #25]
-			USER_USART2_SendTelemetry(
+			USER_USART3_SendTelemetry(
  8004470:	461c      	mov	r4, r3
  8004472:	7eb9      	ldrb	r1, [r7, #26]
  8004474:	7e3b      	ldrb	r3, [r7, #24]
@@ -9655,7 +9655,7 @@ void vTelemetryTask(void *pvParameters)
  800447a:	9300      	str	r3, [sp, #0]
  800447c:	4603      	mov	r3, r0
  800447e:	4620      	mov	r0, r4
- 8004480:	f002 f99c 	bl	80067bc <USER_USART2_SendTelemetry>
+ 8004480:	f002 f99c 	bl	80067bc <USER_USART3_SendTelemetry>
 		if (xQueueReceive(xTelemetryOutputQueue, &outputs, pdMS_TO_TICKS(100)) == pdTRUE) {
  8004484:	e7d8      	b.n	8004438 <vTelemetryTask+0x10>
  8004486:	bf00      	nop
@@ -15252,7 +15252,7 @@ void TIM2_IRQHandler(void)
 080065cc <USER_GPIO_LED_Init>:
 #include "user_uart.h"
 
-static void USER_USART2_Send_8bit( uint8_t Data );
+static void USER_USART3_Send_8bit( uint8_t Data );
 
 /* Initialize GPIO for LED (PA5) */
 void USER_GPIO_LED_Init( void ){
@@ -15300,14 +15300,14 @@ for(DataIdx=0; DataIdx<len; DataIdx++){
  8006610:	2300      	movs	r3, #0
  8006612:	617b      	str	r3, [r7, #20]
  8006614:	e00f      	b.n	8006636 <_write+0x32>
-while(!( USART2->SR & USART_SR_TXE ));
+while(!( USART3->SR & USART_SR_TXE ));
  8006616:	bf00      	nop
  8006618:	4b0c      	ldr	r3, [pc, #48]	@ (800664c <_write+0x48>)
  800661a:	681b      	ldr	r3, [r3, #0]
  800661c:	f003 0380 	and.w	r3, r3, #128	@ 0x80
  8006620:	2b00      	cmp	r3, #0
  8006622:	d0f9      	beq.n	8006618 <_write+0x14>
-USART2->DR = *ptr++;
+USART3->DR = *ptr++;
  8006624:	68bb      	ldr	r3, [r7, #8]
  8006626:	1c5a      	adds	r2, r3, #1
  8006628:	60ba      	str	r2, [r7, #8]
@@ -15332,120 +15332,120 @@ return len;
  8006646:	bc80      	pop	{r7}
  8006648:	4770      	bx	lr
  800664a:	bf00      	nop
- 800664c:	40004400 	.word	0x40004400
+ 800664c:	40004800 	.word	0x40004800
 
-08006650 <USER_USART2_Init>:
+08006650 <USER_USART3_Init>:
 
-void USER_USART2_Init( void ){
+void USER_USART3_Init( void ){
  8006650:	b480      	push	{r7}
  8006652:	b083      	sub	sp, #12
  8006654:	af00      	add	r7, sp, #0
-RCC->APB1ENR|= ( 0x1UL << 17U );//USART2 clock enable
- 8006656:	4b30      	ldr	r3, [pc, #192]	@ (8006718 <USER_USART2_Init+0xc8>)
+RCC->APB1ENR|= ( 0x1UL << 18U );//USART3 clock enable
+ 8006656:	4b30      	ldr	r3, [pc, #192]	@ (8006718 <USER_USART3_Init+0xc8>)
  8006658:	69db      	ldr	r3, [r3, #28]
- 800665a:	4a2f      	ldr	r2, [pc, #188]	@ (8006718 <USER_USART2_Init+0xc8>)
- 800665c:	f443 3300 	orr.w	r3, r3, #131072	@ 0x20000
+ 800665a:	4a2f      	ldr	r2, [pc, #188]	@ (8006718 <USER_USART3_Init+0xc8>)
+ 800665c:	f443 2380 	orr.w	r3, r3, #262144	@ 0x40000
  8006660:	61d3      	str	r3, [r2, #28]
-RCC->APB2ENR|= ( 0x1UL <<  2U );//IO port A clock enable
- 8006662:	4b2d      	ldr	r3, [pc, #180]	@ (8006718 <USER_USART2_Init+0xc8>)
+RCC->APB2ENR|= ( 0x1UL <<  3U );//IO port B clock enable
+ 8006662:	4b2d      	ldr	r3, [pc, #180]	@ (8006718 <USER_USART3_Init+0xc8>)
  8006664:	699b      	ldr	r3, [r3, #24]
- 8006666:	4a2c      	ldr	r2, [pc, #176]	@ (8006718 <USER_USART2_Init+0xc8>)
- 8006668:	f043 0304 	orr.w	r3, r3, #4
+ 8006666:	4a2c      	ldr	r2, [pc, #176]	@ (8006718 <USER_USART3_Init+0xc8>)
+ 8006668:	f043 0308 	orr.w	r3, r3, #8
  800666c:	6193      	str	r3, [r2, #24]
-USART2->CR1|= USART_CR1_UE;//Step 1 Usart enabled
- 800666e:	4b2b      	ldr	r3, [pc, #172]	@ (800671c <USER_USART2_Init+0xcc>)
+USART3->CR1|= USART_CR1_UE;//Step 1 Usart enabled
+ 800666e:	4b2b      	ldr	r3, [pc, #172]	@ (800671c <USER_USART3_Init+0xcc>)
  8006670:	68db      	ldr	r3, [r3, #12]
- 8006672:	4a2a      	ldr	r2, [pc, #168]	@ (800671c <USER_USART2_Init+0xcc>)
+ 8006672:	4a2a      	ldr	r2, [pc, #168]	@ (800671c <USER_USART3_Init+0xcc>)
  8006674:	f443 5300 	orr.w	r3, r3, #8192	@ 0x2000
  8006678:	60d3      	str	r3, [r2, #12]
-USART2->CR1&=~USART_CR1_M;//Step 2 8 Data bits
- 800667a:	4b28      	ldr	r3, [pc, #160]	@ (800671c <USER_USART2_Init+0xcc>)
+USART3->CR1&=~USART_CR1_M;//Step 2 8 Data bits
+ 800667a:	4b28      	ldr	r3, [pc, #160]	@ (800671c <USER_USART3_Init+0xcc>)
  800667c:	68db      	ldr	r3, [r3, #12]
- 800667e:	4a27      	ldr	r2, [pc, #156]	@ (800671c <USER_USART2_Init+0xcc>)
+ 800667e:	4a27      	ldr	r2, [pc, #156]	@ (800671c <USER_USART3_Init+0xcc>)
  8006680:	f423 5380 	bic.w	r3, r3, #4096	@ 0x1000
  8006684:	60d3      	str	r3, [r2, #12]
-USART2->CR2&=~USART_CR2_STOP;//Step 3 1 Stop bit
- 8006686:	4b25      	ldr	r3, [pc, #148]	@ (800671c <USER_USART2_Init+0xcc>)
+USART3->CR2&=~USART_CR2_STOP;//Step 3 1 Stop bit
+ 8006686:	4b25      	ldr	r3, [pc, #148]	@ (800671c <USER_USART3_Init+0xcc>)
  8006688:	691b      	ldr	r3, [r3, #16]
- 800668a:	4a24      	ldr	r2, [pc, #144]	@ (800671c <USER_USART2_Init+0xcc>)
+ 800668a:	4a24      	ldr	r2, [pc, #144]	@ (800671c <USER_USART3_Init+0xcc>)
  800668c:	f423 5340 	bic.w	r3, r3, #12288	@ 0x3000
  8006690:	6113      	str	r3, [r2, #16]
-USART2->BRR  = USARTDIV;//Step 5 Desired baud rate
- 8006692:	4b22      	ldr	r3, [pc, #136]	@ (800671c <USER_USART2_Init+0xcc>)
+USART3->BRR  = USARTDIV;//Step 5 Desired baud rate
+ 8006692:	4b22      	ldr	r3, [pc, #136]	@ (800671c <USER_USART3_Init+0xcc>)
  8006694:	f640 5205 	movw	r2, #3333	@ 0xd05
  8006698:	609a      	str	r2, [r3, #8]
-USART2->CR1|=  USART_CR1_TE;//Step 6 Transmitter enabled
- 800669a:	4b20      	ldr	r3, [pc, #128]	@ (800671c <USER_USART2_Init+0xcc>)
+USART3->CR1|=  USART_CR1_TE;//Step 6 Transmitter enabled
+ 800669a:	4b20      	ldr	r3, [pc, #128]	@ (800671c <USER_USART3_Init+0xcc>)
  800669c:	68db      	ldr	r3, [r3, #12]
- 800669e:	4a1f      	ldr	r2, [pc, #124]	@ (800671c <USER_USART2_Init+0xcc>)
+ 800669e:	4a1f      	ldr	r2, [pc, #124]	@ (800671c <USER_USART3_Init+0xcc>)
  80066a0:	f043 0308 	orr.w	r3, r3, #8
  80066a4:	60d3      	str	r3, [r2, #12]
-USART2->CR1|=  USART_CR1_RE;//Step 6b Receiver enabled
- 80066a6:	4b1d      	ldr	r3, [pc, #116]	@ (800671c <USER_USART2_Init+0xcc>)
+USART3->CR1|=  USART_CR1_RE;//Step 6b Receiver enabled
+ 80066a6:	4b1d      	ldr	r3, [pc, #116]	@ (800671c <USER_USART3_Init+0xcc>)
  80066a8:	68db      	ldr	r3, [r3, #12]
- 80066aa:	4a1c      	ldr	r2, [pc, #112]	@ (800671c <USER_USART2_Init+0xcc>)
+ 80066aa:	4a1c      	ldr	r2, [pc, #112]	@ (800671c <USER_USART3_Init+0xcc>)
  80066ac:	f043 0304 	orr.w	r3, r3, #4
  80066b0:	60d3      	str	r3, [r2, #12]
 
 /* Enable RXNE interrupt */
-USART2->CR1 |= (1UL << 5U);
- 80066b2:	4b1a      	ldr	r3, [pc, #104]	@ (800671c <USER_USART2_Init+0xcc>)
+USART3->CR1 |= (1UL << 5U);
+ 80066b2:	4b1a      	ldr	r3, [pc, #104]	@ (800671c <USER_USART3_Init+0xcc>)
  80066b4:	68db      	ldr	r3, [r3, #12]
- 80066b6:	4a19      	ldr	r2, [pc, #100]	@ (800671c <USER_USART2_Init+0xcc>)
+ 80066b6:	4a19      	ldr	r2, [pc, #100]	@ (800671c <USER_USART3_Init+0xcc>)
  80066b8:	f043 0320 	orr.w	r3, r3, #32
  80066bc:	60d3      	str	r3, [r2, #12]
 
-/* Configure NVIC for USART2 (IRQ 38) */
+/* Configure NVIC for USART3 (IRQ 39) */
 volatile uint8_t *nvic_ipr = (volatile uint8_t *)0xE000E400;
- 80066be:	4b18      	ldr	r3, [pc, #96]	@ (8006720 <USER_USART2_Init+0xd0>)
+ 80066be:	4b18      	ldr	r3, [pc, #96]	@ (8006720 <USER_USART3_Init+0xd0>)
  80066c0:	607b      	str	r3, [r7, #4]
-nvic_ipr[38] = (6U << 4U); /* Priority 6 */
+nvic_ipr[39] = (6U << 4U); /* Priority 6 */
  80066c2:	687b      	ldr	r3, [r7, #4]
- 80066c4:	3326      	adds	r3, #38	@ 0x26
+ 80066c4:	3327      	adds	r3, #39	@ 0x27
  80066c6:	2260      	movs	r2, #96	@ 0x60
  80066c8:	701a      	strb	r2, [r3, #0]
-NVIC_ISER1 |= (1UL << (38 - 32));
- 80066ca:	4b16      	ldr	r3, [pc, #88]	@ (8006724 <USER_USART2_Init+0xd4>)
+NVIC_ISER1 |= (1UL << (39 - 32));
+ 80066ca:	4b16      	ldr	r3, [pc, #88]	@ (8006724 <USER_USART3_Init+0xd4>)
  80066cc:	681b      	ldr	r3, [r3, #0]
- 80066ce:	4a15      	ldr	r2, [pc, #84]	@ (8006724 <USER_USART2_Init+0xd4>)
- 80066d0:	f043 0340 	orr.w	r3, r3, #64	@ 0x40
+ 80066ce:	4a15      	ldr	r2, [pc, #84]	@ (8006724 <USER_USART3_Init+0xd4>)
+ 80066d0:	f043 0380 	orr.w	r3, r3, #128	@ 0x80
  80066d4:	6013      	str	r3, [r2, #0]
 
-/* Configure PA2 (TX) as Alternate Function Output Push-Pull */
-uint32_t temp = GPIOA->CRL;
- 80066d6:	4b14      	ldr	r3, [pc, #80]	@ (8006728 <USER_USART2_Init+0xd8>)
- 80066d8:	681b      	ldr	r3, [r3, #0]
+/* Configure PB10 (TX) as Alternate Function Output Push-Pull */
+uint32_t temp = GPIOB->CRH;
+ 80066d6:	4b14      	ldr	r3, [pc, #80]	@ (8006728 <USER_USART3_Init+0xd8>)
+ 80066d8:	685b      	ldr	r3, [r3, #4]
  80066da:	603b      	str	r3, [r7, #0]
-temp &= ~( 0xFUL << (2U * 4U));//Clear PA2 bits
+temp &= ~( 0xFUL << (2U * 4U));//Clear PB10 bits (2U*4U for pins 8-15 offset)
  80066dc:	683b      	ldr	r3, [r7, #0]
  80066de:	f423 6370 	bic.w	r3, r3, #3840	@ 0xf00
  80066e2:	603b      	str	r3, [r7, #0]
-temp |= (0xAUL << (2U * 4U));//PA2 AF Push-Pull Output 10MHz (0xA)
+temp |= (0xAUL << (2U * 4U));//PB10 AF Push-Pull Output 10MHz (0xA)
  80066e4:	683b      	ldr	r3, [r7, #0]
  80066e6:	f443 6320 	orr.w	r3, r3, #2560	@ 0xa00
  80066ea:	603b      	str	r3, [r7, #0]
-GPIOA->CRL = temp;
- 80066ec:	4a0e      	ldr	r2, [pc, #56]	@ (8006728 <USER_USART2_Init+0xd8>)
+GPIOB->CRH = temp;
+ 80066ec:	4a0e      	ldr	r2, [pc, #56]	@ (8006728 <USER_USART3_Init+0xd8>)
  80066ee:	683b      	ldr	r3, [r7, #0]
- 80066f0:	6013      	str	r3, [r2, #0]
+ 80066f0:	6053      	str	r3, [r2, #4]
 
-/* Configure PA3 (RX) as Alternate Function Input Floating */
-temp = GPIOA->CRL;
- 80066f2:	4b0d      	ldr	r3, [pc, #52]	@ (8006728 <USER_USART2_Init+0xd8>)
- 80066f4:	681b      	ldr	r3, [r3, #0]
+/* Configure PB11 (RX) as Alternate Function Input Floating */
+temp = GPIOB->CRH;
+ 80066f2:	4b0d      	ldr	r3, [pc, #52]	@ (8006728 <USER_USART3_Init+0xd8>)
+ 80066f4:	685b      	ldr	r3, [r3, #4]
  80066f6:	603b      	str	r3, [r7, #0]
-temp &= ~( 0xFUL << (3U * 4U));//Clear PA3 bits
+temp &= ~( 0xFUL << (3U * 4U));//Clear PB11 bits
  80066f8:	683b      	ldr	r3, [r7, #0]
  80066fa:	f423 4370 	bic.w	r3, r3, #61440	@ 0xf000
  80066fe:	603b      	str	r3, [r7, #0]
-temp |= (0x4UL << (3U * 4U));//PA3 Floating Input (0x4 = mode 0, CNF 1)
+temp |= (0x4UL << (3U * 4U));//PB11 Floating Input (0x4 = mode 0, CNF 1)
  8006700:	683b      	ldr	r3, [r7, #0]
  8006702:	f443 4380 	orr.w	r3, r3, #16384	@ 0x4000
  8006706:	603b      	str	r3, [r7, #0]
-GPIOA->CRL = temp;
- 8006708:	4a07      	ldr	r2, [pc, #28]	@ (8006728 <USER_USART2_Init+0xd8>)
+GPIOB->CRH = temp;
+ 8006708:	4a07      	ldr	r2, [pc, #28]	@ (8006728 <USER_USART3_Init+0xd8>)
  800670a:	683b      	ldr	r3, [r7, #0]
- 800670c:	6013      	str	r3, [r2, #0]
+ 800670c:	6053      	str	r3, [r2, #4]
 }
  800670e:	bf00      	nop
  8006710:	370c      	adds	r7, #12
@@ -15453,15 +15453,15 @@ GPIOA->CRL = temp;
  8006714:	bc80      	pop	{r7}
  8006716:	4770      	bx	lr
  8006718:	40021000 	.word	0x40021000
- 800671c:	40004400 	.word	0x40004400
+ 800671c:	40004800 	.word	0x40004800
  8006720:	e000e400 	.word	0xe000e400
  8006724:	e000e104 	.word	0xe000e104
- 8006728:	40010800 	.word	0x40010800
+ 8006728:	40010c00 	.word	0x40010c00
 
-0800672c <USER_USART2_Transmit>:
+0800672c <USER_USART3_Transmit>:
 
 
-void USER_USART2_Transmit( uint8_t *pData, uint16_t size ){
+void USER_USART3_Transmit( uint8_t *pData, uint16_t size ){
  800672c:	b580      	push	{r7, lr}
  800672e:	b084      	sub	sp, #16
  8006730:	af00      	add	r7, sp, #0
@@ -15471,14 +15471,14 @@ void USER_USART2_Transmit( uint8_t *pData, uint16_t size ){
 for( int i = 0; i < size; i++ ){
  8006738:	2300      	movs	r3, #0
  800673a:	60fb      	str	r3, [r7, #12]
- 800673c:	e009      	b.n	8006752 <USER_USART2_Transmit+0x26>
-USER_USART2_Send_8bit( *pData++ );
+ 800673c:	e009      	b.n	8006752 <USER_USART3_Transmit+0x26>
+USER_USART3_Send_8bit( *pData++ );
  800673e:	687b      	ldr	r3, [r7, #4]
  8006740:	1c5a      	adds	r2, r3, #1
  8006742:	607a      	str	r2, [r7, #4]
  8006744:	781b      	ldrb	r3, [r3, #0]
  8006746:	4618      	mov	r0, r3
- 8006748:	f000 f80c 	bl	8006764 <USER_USART2_Send_8bit>
+ 8006748:	f000 f80c 	bl	8006764 <USER_USART3_Send_8bit>
 for( int i = 0; i < size; i++ ){
  800674c:	68fb      	ldr	r3, [r7, #12]
  800674e:	3301      	adds	r3, #1
@@ -15486,7 +15486,7 @@ for( int i = 0; i < size; i++ ){
  8006752:	887b      	ldrh	r3, [r7, #2]
  8006754:	68fa      	ldr	r2, [r7, #12]
  8006756:	429a      	cmp	r2, r3
- 8006758:	dbf1      	blt.n	800673e <USER_USART2_Transmit+0x12>
+ 8006758:	dbf1      	blt.n	800673e <USER_USART3_Transmit+0x12>
 }
 }
  800675a:	bf00      	nop
@@ -15495,23 +15495,23 @@ for( int i = 0; i < size; i++ ){
  8006760:	46bd      	mov	sp, r7
  8006762:	bd80      	pop	{r7, pc}
 
-08006764 <USER_USART2_Send_8bit>:
+08006764 <USER_USART3_Send_8bit>:
 
-static void USER_USART2_Send_8bit( uint8_t Data ){
+static void USER_USART3_Send_8bit( uint8_t Data ){
  8006764:	b480      	push	{r7}
  8006766:	b083      	sub	sp, #12
  8006768:	af00      	add	r7, sp, #0
  800676a:	4603      	mov	r3, r0
  800676c:	71fb      	strb	r3, [r7, #7]
-while(!( USART2->SR & USART_SR_TXE ));//wait until next data can be written
+while(!( USART3->SR & USART_SR_TXE ));//wait until next data can be written
  800676e:	bf00      	nop
- 8006770:	4b06      	ldr	r3, [pc, #24]	@ (800678c <USER_USART2_Send_8bit+0x28>)
+ 8006770:	4b06      	ldr	r3, [pc, #24]	@ (800678c <USER_USART3_Send_8bit+0x28>)
  8006772:	681b      	ldr	r3, [r3, #0]
  8006774:	f003 0380 	and.w	r3, r3, #128	@ 0x80
  8006778:	2b00      	cmp	r3, #0
- 800677a:	d0f9      	beq.n	8006770 <USER_USART2_Send_8bit+0xc>
-USART2->DR = Data;//Step 7 Data to send
- 800677c:	4a03      	ldr	r2, [pc, #12]	@ (800678c <USER_USART2_Send_8bit+0x28>)
+ 800677a:	d0f9      	beq.n	8006770 <USER_USART3_Send_8bit+0xc>
+USART3->DR = Data;//Step 7 Data to send
+ 800677c:	4a03      	ldr	r2, [pc, #12]	@ (800678c <USER_USART3_Send_8bit+0x28>)
  800677e:	79fb      	ldrb	r3, [r7, #7]
  8006780:	6053      	str	r3, [r2, #4]
 }
@@ -15520,14 +15520,14 @@ USART2->DR = Data;//Step 7 Data to send
  8006786:	46bd      	mov	sp, r7
  8006788:	bc80      	pop	{r7}
  800678a:	4770      	bx	lr
- 800678c:	40004400 	.word	0x40004400
+ 800678c:	40004800 	.word	0x40004800
 
-08006790 <USER_USART2_SendString>:
-while(!( USART2->SR & USART_SR_RXNE ));//wait until a data is received (RXNE flag)
-return (uint8_t)(USART2->DR & 0xFF);//return data (DR register)
+08006790 <USER_USART3_SendString>:
+while(!( USART3->SR & USART_SR_RXNE ));//wait until a data is received (RXNE flag)
+return (uint8_t)(USART3->DR & 0xFF);//return data (DR register)
 }
 
-void USER_USART2_SendString(const char *text)
+void USER_USART3_SendString(const char *text)
 {
  8006790:	b580      	push	{r7, lr}
  8006792:	b082      	sub	sp, #8
@@ -15536,19 +15536,19 @@ void USER_USART2_SendString(const char *text)
 if (text == NULL) {
  8006798:	687b      	ldr	r3, [r7, #4]
  800679a:	2b00      	cmp	r3, #0
- 800679c:	d009      	beq.n	80067b2 <USER_USART2_SendString+0x22>
+ 800679c:	d009      	beq.n	80067b2 <USER_USART3_SendString+0x22>
 return;
 }
 
-USER_USART2_Transmit((uint8_t *)text, (uint16_t)strlen(text));
+USER_USART3_Transmit((uint8_t *)text, (uint16_t)strlen(text));
  800679e:	6878      	ldr	r0, [r7, #4]
  80067a0:	f7f9 fce6 	bl	8000170 <strlen>
  80067a4:	4603      	mov	r3, r0
  80067a6:	b29b      	uxth	r3, r3
  80067a8:	4619      	mov	r1, r3
  80067aa:	6878      	ldr	r0, [r7, #4]
- 80067ac:	f7ff ffbe 	bl	800672c <USER_USART2_Transmit>
- 80067b0:	e000      	b.n	80067b4 <USER_USART2_SendString+0x24>
+ 80067ac:	f7ff ffbe 	bl	800672c <USER_USART3_Transmit>
+ 80067b0:	e000      	b.n	80067b4 <USER_USART3_SendString+0x24>
 return;
  80067b2:	bf00      	nop
 }
@@ -15557,9 +15557,9 @@ return;
  80067b8:	bd80      	pop	{r7, pc}
 	...
 
-080067bc <USER_USART2_SendTelemetry>:
+080067bc <USER_USART3_SendTelemetry>:
 
-void USER_USART2_SendTelemetry(uint16_t throttlePercent, uint8_t brakeActive, uint16_t engineRpm, uint16_t vehicleSpeed, uint8_t gear)
+void USER_USART3_SendTelemetry(uint16_t throttlePercent, uint8_t brakeActive, uint16_t engineRpm, uint16_t vehicleSpeed, uint8_t gear)
 {
  80067bc:	b5b0      	push	{r4, r5, r7, lr}
  80067be:	b0a0      	sub	sp, #128	@ 0x80
@@ -15589,7 +15589,7 @@ int written = snprintf(
  80067ee:	9201      	str	r2, [sp, #4]
  80067f0:	9300      	str	r3, [sp, #0]
  80067f2:	462b      	mov	r3, r5
- 80067f4:	4a0e      	ldr	r2, [pc, #56]	@ (8006830 <USER_USART2_SendTelemetry+0x74>)
+ 80067f4:	4a0e      	ldr	r2, [pc, #56]	@ (8006830 <USER_USART3_SendTelemetry+0x74>)
  80067f6:	2160      	movs	r1, #96	@ 0x60
  80067f8:	4620      	mov	r0, r4
  80067fa:	f000 ffd5 	bl	80077a8 <sniprintf>
@@ -15602,22 +15602,22 @@ int written = snprintf(
 	if (written > 0) {
  8006800:	6efb      	ldr	r3, [r7, #108]	@ 0x6c
  8006802:	2b00      	cmp	r3, #0
- 8006804:	dd10      	ble.n	8006828 <USER_USART2_SendTelemetry+0x6c>
+ 8006804:	dd10      	ble.n	8006828 <USER_USART3_SendTelemetry+0x6c>
 		uint16_t frameSize = (written >= (int)sizeof telemetryFrame) ? (uint16_t)(sizeof telemetryFrame - 1U) : (uint16_t)written;
  8006806:	6efb      	ldr	r3, [r7, #108]	@ 0x6c
  8006808:	2b5f      	cmp	r3, #95	@ 0x5f
- 800680a:	dc02      	bgt.n	8006812 <USER_USART2_SendTelemetry+0x56>
+ 800680a:	dc02      	bgt.n	8006812 <USER_USART3_SendTelemetry+0x56>
  800680c:	6efb      	ldr	r3, [r7, #108]	@ 0x6c
  800680e:	b29b      	uxth	r3, r3
- 8006810:	e000      	b.n	8006814 <USER_USART2_SendTelemetry+0x58>
+ 8006810:	e000      	b.n	8006814 <USER_USART3_SendTelemetry+0x58>
  8006812:	235f      	movs	r3, #95	@ 0x5f
  8006814:	f8a7 306a 	strh.w	r3, [r7, #106]	@ 0x6a
-		USER_USART2_Transmit((uint8_t *)telemetryFrame, frameSize);
+		USER_USART3_Transmit((uint8_t *)telemetryFrame, frameSize);
  8006818:	f8b7 206a 	ldrh.w	r2, [r7, #106]	@ 0x6a
  800681c:	f107 0308 	add.w	r3, r7, #8
  8006820:	4611      	mov	r1, r2
  8006822:	4618      	mov	r0, r3
- 8006824:	f7ff ff82 	bl	800672c <USER_USART2_Transmit>
+ 8006824:	f7ff ff82 	bl	800672c <USER_USART3_Transmit>
 	}
 }
  8006828:	bf00      	nop
@@ -15626,85 +15626,85 @@ int written = snprintf(
  800682e:	bdb0      	pop	{r4, r5, r7, pc}
  8006830:	0800ac84 	.word	0x0800ac84
 
-08006834 <USART2_IRQHandler>:
+08006834 <USART3_IRQHandler>:
 char USER_UART_RxBuffer[64];
 volatile uint8_t USER_UART_RxReady = 0;
 static uint8_t rx_idx = 0;
 
-void USART2_IRQHandler(void)
+void USART3_IRQHandler(void)
 {
  8006834:	b480      	push	{r7}
  8006836:	b083      	sub	sp, #12
  8006838:	af00      	add	r7, sp, #0
-	if (USART2->SR & USART_SR_RXNE) {
- 800683a:	4b1a      	ldr	r3, [pc, #104]	@ (80068a4 <USART2_IRQHandler+0x70>)
+	if (USART3->SR & USART_SR_RXNE) {
+ 800683a:	4b1a      	ldr	r3, [pc, #104]	@ (80068a4 <USART3_IRQHandler+0x70>)
  800683c:	681b      	ldr	r3, [r3, #0]
  800683e:	f003 0320 	and.w	r3, r3, #32
  8006842:	2b00      	cmp	r3, #0
- 8006844:	d028      	beq.n	8006898 <USART2_IRQHandler+0x64>
-		char c = (char)(USART2->DR & 0xFF);
- 8006846:	4b17      	ldr	r3, [pc, #92]	@ (80068a4 <USART2_IRQHandler+0x70>)
+ 8006844:	d028      	beq.n	8006898 <USART3_IRQHandler+0x64>
+		char c = (char)(USART3->DR & 0xFF);
+ 8006846:	4b17      	ldr	r3, [pc, #92]	@ (80068a4 <USART3_IRQHandler+0x70>)
  8006848:	685b      	ldr	r3, [r3, #4]
  800684a:	71fb      	strb	r3, [r7, #7]
 		if (c == '\n' || c == '\r') {
  800684c:	79fb      	ldrb	r3, [r7, #7]
  800684e:	2b0a      	cmp	r3, #10
- 8006850:	d002      	beq.n	8006858 <USART2_IRQHandler+0x24>
+ 8006850:	d002      	beq.n	8006858 <USART3_IRQHandler+0x24>
  8006852:	79fb      	ldrb	r3, [r7, #7]
  8006854:	2b0d      	cmp	r3, #13
- 8006856:	d110      	bne.n	800687a <USART2_IRQHandler+0x46>
+ 8006856:	d110      	bne.n	800687a <USART3_IRQHandler+0x46>
 			if (rx_idx > 0) {
- 8006858:	4b13      	ldr	r3, [pc, #76]	@ (80068a8 <USART2_IRQHandler+0x74>)
+ 8006858:	4b13      	ldr	r3, [pc, #76]	@ (80068a8 <USART3_IRQHandler+0x74>)
  800685a:	781b      	ldrb	r3, [r3, #0]
  800685c:	2b00      	cmp	r3, #0
- 800685e:	d01b      	beq.n	8006898 <USART2_IRQHandler+0x64>
+ 800685e:	d01b      	beq.n	8006898 <USART3_IRQHandler+0x64>
 				USER_UART_RxBuffer[rx_idx] = '\0';
- 8006860:	4b11      	ldr	r3, [pc, #68]	@ (80068a8 <USART2_IRQHandler+0x74>)
+ 8006860:	4b11      	ldr	r3, [pc, #68]	@ (80068a8 <USART3_IRQHandler+0x74>)
  8006862:	781b      	ldrb	r3, [r3, #0]
  8006864:	461a      	mov	r2, r3
- 8006866:	4b11      	ldr	r3, [pc, #68]	@ (80068ac <USART2_IRQHandler+0x78>)
+ 8006866:	4b11      	ldr	r3, [pc, #68]	@ (80068ac <USART3_IRQHandler+0x78>)
  8006868:	2100      	movs	r1, #0
  800686a:	5499      	strb	r1, [r3, r2]
 				USER_UART_RxReady = 1;
- 800686c:	4b10      	ldr	r3, [pc, #64]	@ (80068b0 <USART2_IRQHandler+0x7c>)
+ 800686c:	4b10      	ldr	r3, [pc, #64]	@ (80068b0 <USART3_IRQHandler+0x7c>)
  800686e:	2201      	movs	r2, #1
  8006870:	701a      	strb	r2, [r3, #0]
 				rx_idx = 0;
- 8006872:	4b0d      	ldr	r3, [pc, #52]	@ (80068a8 <USART2_IRQHandler+0x74>)
+ 8006872:	4b0d      	ldr	r3, [pc, #52]	@ (80068a8 <USART3_IRQHandler+0x74>)
  8006874:	2200      	movs	r2, #0
  8006876:	701a      	strb	r2, [r3, #0]
 			if (rx_idx > 0) {
- 8006878:	e00e      	b.n	8006898 <USART2_IRQHandler+0x64>
+ 8006878:	e00e      	b.n	8006898 <USART3_IRQHandler+0x64>
 			}
 		} else {
 			if (rx_idx < sizeof(USER_UART_RxBuffer) - 1) {
- 800687a:	4b0b      	ldr	r3, [pc, #44]	@ (80068a8 <USART2_IRQHandler+0x74>)
+ 800687a:	4b0b      	ldr	r3, [pc, #44]	@ (80068a8 <USART3_IRQHandler+0x74>)
  800687c:	781b      	ldrb	r3, [r3, #0]
  800687e:	2b3e      	cmp	r3, #62	@ 0x3e
- 8006880:	d80a      	bhi.n	8006898 <USART2_IRQHandler+0x64>
+ 8006880:	d80a      	bhi.n	8006898 <USART3_IRQHandler+0x64>
 				USER_UART_RxBuffer[rx_idx++] = c;
- 8006882:	4b09      	ldr	r3, [pc, #36]	@ (80068a8 <USART2_IRQHandler+0x74>)
+ 8006882:	4b09      	ldr	r3, [pc, #36]	@ (80068a8 <USART3_IRQHandler+0x74>)
  8006884:	781b      	ldrb	r3, [r3, #0]
  8006886:	1c5a      	adds	r2, r3, #1
  8006888:	b2d1      	uxtb	r1, r2
- 800688a:	4a07      	ldr	r2, [pc, #28]	@ (80068a8 <USART2_IRQHandler+0x74>)
+ 800688a:	4a07      	ldr	r2, [pc, #28]	@ (80068a8 <USART3_IRQHandler+0x74>)
  800688c:	7011      	strb	r1, [r2, #0]
  800688e:	4619      	mov	r1, r3
- 8006890:	4a06      	ldr	r2, [pc, #24]	@ (80068ac <USART2_IRQHandler+0x78>)
+ 8006890:	4a06      	ldr	r2, [pc, #24]	@ (80068ac <USART3_IRQHandler+0x78>)
  8006892:	79fb      	ldrb	r3, [r7, #7]
  8006894:	5453      	strb	r3, [r2, r1]
 			}
 		}
 	}
 }
- 8006896:	e7ff      	b.n	8006898 <USART2_IRQHandler+0x64>
+ 8006896:	e7ff      	b.n	8006898 <USART3_IRQHandler+0x64>
  8006898:	bf00      	nop
  800689a:	370c      	adds	r7, #12
  800689c:	46bd      	mov	sp, r7
  800689e:	bc80      	pop	{r7}
  80068a0:	4770      	bx	lr
  80068a2:	bf00      	nop
- 80068a4:	40004400 	.word	0x40004400
+ 80068a4:	40004800 	.word	0x40004800
  80068a8:	20003c59 	.word	0x20003c59
  80068ac:	20003c18 	.word	0x20003c18
  80068b0:	20003c58 	.word	0x20003c58

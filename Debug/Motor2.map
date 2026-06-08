@@ -546,7 +546,7 @@ Discarded input sections
  .debug_macro   0x00000000       0x8e ./Src/main_uart.o
  .debug_macro   0x00000000       0x1c ./Src/main_uart.o
  .debug_macro   0x00000000      0x17e ./Src/main_uart.o
- .debug_macro   0x00000000       0xd4 ./Src/main_uart.o
+ .debug_macro   0x00000000       0xe2 ./Src/main_uart.o
  .debug_macro   0x00000000      0x19b ./Src/main_uart.o
  .debug_macro   0x00000000       0x7f ./Src/main_uart.o
  .debug_macro   0x00000000       0x10 ./Src/main_uart.o
@@ -973,7 +973,7 @@ Discarded input sections
  .debug_macro   0x00000000       0x16 ./Src/task_app.o
  .debug_macro   0x00000000       0x16 ./Src/task_app.o
  .debug_macro   0x00000000      0x146 ./Src/task_app.o
- .debug_macro   0x00000000       0xd4 ./Src/task_app.o
+ .debug_macro   0x00000000       0xe2 ./Src/task_app.o
  .debug_macro   0x00000000       0x16 ./Src/task_app.o
  .debug_macro   0x00000000      0x154 ./Src/task_app.o
  .debug_macro   0x00000000       0x2e ./Src/task_app.o
@@ -1249,7 +1249,7 @@ Discarded input sections
  .debug_macro   0x00000000      0x103 ./Src/user_adc.o
  .debug_macro   0x00000000       0x6a ./Src/user_adc.o
  .debug_macro   0x00000000      0x1df ./Src/user_adc.o
- .debug_macro   0x00000000       0xd4 ./Src/user_adc.o
+ .debug_macro   0x00000000       0xe2 ./Src/user_adc.o
  .debug_macro   0x00000000      0x190 ./Src/user_adc.o
  .debug_macro   0x00000000       0x16 ./Src/user_adc.o
  .debug_macro   0x00000000      0x154 ./Src/user_adc.o
@@ -1280,7 +1280,7 @@ Discarded input sections
  .debug_macro   0x00000000      0x103 ./Src/user_motor.o
  .debug_macro   0x00000000       0x6a ./Src/user_motor.o
  .debug_macro   0x00000000      0x1df ./Src/user_motor.o
- .debug_macro   0x00000000       0xd4 ./Src/user_motor.o
+ .debug_macro   0x00000000       0xe2 ./Src/user_motor.o
  .group         0x00000000        0xc ./Src/user_pwm.o
  .group         0x00000000        0xc ./Src/user_pwm.o
  .group         0x00000000        0xc ./Src/user_pwm.o
@@ -1299,7 +1299,7 @@ Discarded input sections
  .debug_macro   0x00000000      0x103 ./Src/user_pwm.o
  .debug_macro   0x00000000       0x6a ./Src/user_pwm.o
  .debug_macro   0x00000000      0x1df ./Src/user_pwm.o
- .debug_macro   0x00000000       0xd4 ./Src/user_pwm.o
+ .debug_macro   0x00000000       0xe2 ./Src/user_pwm.o
  .group         0x00000000        0xc ./Src/user_timer.o
  .group         0x00000000        0xc ./Src/user_timer.o
  .group         0x00000000        0xc ./Src/user_timer.o
@@ -1347,7 +1347,7 @@ Discarded input sections
  .debug_macro   0x00000000      0x103 ./Src/user_timer.o
  .debug_macro   0x00000000       0x6a ./Src/user_timer.o
  .debug_macro   0x00000000      0x1df ./Src/user_timer.o
- .debug_macro   0x00000000       0xd4 ./Src/user_timer.o
+ .debug_macro   0x00000000       0xe2 ./Src/user_timer.o
  .debug_macro   0x00000000      0x190 ./Src/user_timer.o
  .debug_macro   0x00000000       0x16 ./Src/user_timer.o
  .debug_macro   0x00000000      0x154 ./Src/user_timer.o
@@ -1412,7 +1412,7 @@ Discarded input sections
  .text          0x00000000        0x0 ./Src/user_uart.o
  .data          0x00000000        0x0 ./Src/user_uart.o
  .bss           0x00000000        0x0 ./Src/user_uart.o
- .text.USER_USART2_Receive_8bit
+ .text.USER_USART3_Receive_8bit
                 0x00000000       0x24 ./Src/user_uart.o
  .debug_macro   0x00000000      0xad2 ./Src/user_uart.o
  .debug_macro   0x00000000       0x22 ./Src/user_uart.o
@@ -1444,7 +1444,7 @@ Discarded input sections
  .debug_macro   0x00000000       0x16 ./Src/user_uart.o
  .debug_macro   0x00000000       0x3c ./Src/user_uart.o
  .debug_macro   0x00000000       0x20 ./Src/user_uart.o
- .debug_macro   0x00000000       0xd4 ./Src/user_uart.o
+ .debug_macro   0x00000000       0xe2 ./Src/user_uart.o
  .debug_macro   0x00000000       0x3a ./Src/user_uart.o
  .text          0x00000000       0x14 ./Startup/startup_stm32f103rbtx.o
  .data          0x00000000        0x0 ./Startup/startup_stm32f103rbtx.o
@@ -2324,24 +2324,24 @@ LOAD C:/ST/STM32CubeIDE_2.1.1/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.exte
                 0x080065cc                USER_GPIO_LED_Init
  .text._write   0x08006604       0x4c ./Src/user_uart.o
                 0x08006604                _write
- .text.USER_USART2_Init
+ .text.USER_USART3_Init
                 0x08006650       0xdc ./Src/user_uart.o
-                0x08006650                USER_USART2_Init
- .text.USER_USART2_Transmit
+                0x08006650                USER_USART3_Init
+ .text.USER_USART3_Transmit
                 0x0800672c       0x38 ./Src/user_uart.o
-                0x0800672c                USER_USART2_Transmit
- .text.USER_USART2_Send_8bit
+                0x0800672c                USER_USART3_Transmit
+ .text.USER_USART3_Send_8bit
                 0x08006764       0x2c ./Src/user_uart.o
- .text.USER_USART2_SendString
+ .text.USER_USART3_SendString
                 0x08006790       0x2a ./Src/user_uart.o
-                0x08006790                USER_USART2_SendString
+                0x08006790                USER_USART3_SendString
  *fill*         0x080067ba        0x2 
- .text.USER_USART2_SendTelemetry
+ .text.USER_USART3_SendTelemetry
                 0x080067bc       0x78 ./Src/user_uart.o
-                0x080067bc                USER_USART2_SendTelemetry
- .text.USART2_IRQHandler
+                0x080067bc                USER_USART3_SendTelemetry
+ .text.USART3_IRQHandler
                 0x08006834       0x80 ./Src/user_uart.o
-                0x08006834                USART2_IRQHandler
+                0x08006834                USART3_IRQHandler
  .text.Reset_Handler
                 0x080068b4       0x50 ./Startup/startup_stm32f103rbtx.o
                 0x080068b4                Reset_Handler
@@ -2369,7 +2369,6 @@ LOAD C:/ST/STM32CubeIDE_2.1.1/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.exte
                 0x08006904                TIM8_UP_IRQHandler
                 0x08006904                DMA2_Channel2_IRQHandler
                 0x08006904                DMA1_Channel4_IRQHandler
-                0x08006904                USART3_IRQHandler
                 0x08006904                RTC_IRQHandler
                 0x08006904                DMA1_Channel7_IRQHandler
                 0x08006904                UART5_IRQHandler
@@ -2402,6 +2401,7 @@ LOAD C:/ST/STM32CubeIDE_2.1.1/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.exte
                 0x08006904                EXTI1_IRQHandler
                 0x08006904                RTCAlarm_IRQHandler
                 0x08006904                DMA2_Channel4_5_IRQHandler
+                0x08006904                USART2_IRQHandler
                 0x08006904                I2C2_ER_IRQHandler
                 0x08006904                DMA1_Channel2_IRQHandler
                 0x08006904                TIM8_BRK_IRQHandler
@@ -3357,7 +3357,7 @@ LOAD C:/ST/STM32CubeIDE_2.1.1/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.exte
  .debug_rnglists
                 0x00000621       0x19 ./Startup/startup_stm32f103rbtx.o
 
-.debug_macro    0x00000000     0x63a8
+.debug_macro    0x00000000     0x63b6
  .debug_macro   0x00000000      0x17a ./Src/EngTrModel.o
  .debug_macro   0x0000017a      0xad2 ./Src/EngTrModel.o
  .debug_macro   0x00000c4c       0x22 ./Src/EngTrModel.o
@@ -3407,58 +3407,58 @@ LOAD C:/ST/STM32CubeIDE_2.1.1/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.exte
  .debug_macro   0x0000385c      0x103 ./Src/lcd.o
  .debug_macro   0x0000395f       0x8e ./Src/lcd.o
  .debug_macro   0x000039ed       0x51 ./Src/lcd.o
- .debug_macro   0x00003a3e       0xd4 ./Src/lcd.o
- .debug_macro   0x00003b12       0xa0 ./Src/lcd.o
- .debug_macro   0x00003bb2      0x1a2 ./Src/list.o
- .debug_macro   0x00003d54      0x280 ./Src/main_uart.o
- .debug_macro   0x00003fd4       0x61 ./Src/main_uart.o
- .debug_macro   0x00004035       0x16 ./Src/main_uart.o
- .debug_macro   0x0000404b       0x9e ./Src/main_uart.o
- .debug_macro   0x000040e9      0x112 ./Src/main_uart.o
- .debug_macro   0x000041fb       0x10 ./Src/main_uart.o
- .debug_macro   0x0000420b       0x16 ./Src/main_uart.o
- .debug_macro   0x00004221       0x16 ./Src/main_uart.o
- .debug_macro   0x00004237      0x146 ./Src/main_uart.o
- .debug_macro   0x0000437d       0x3a ./Src/main_uart.o
- .debug_macro   0x000043b7       0x80 ./Src/main_uart.o
- .debug_macro   0x00004437      0x1ab ./Src/port.o
- .debug_macro   0x000045e2      0x239 ./Src/queue.o
- .debug_macro   0x0000481b       0x41 ./Src/rtGetInf.o
- .debug_macro   0x0000485c       0x41 ./Src/rtGetNaN.o
- .debug_macro   0x0000489d       0x4d ./Src/rt_nonfinite.o
- .debug_macro   0x000048ea      0x274 ./Src/syscall.o
- .debug_macro   0x00004b5e       0x10 ./Src/syscall.o
- .debug_macro   0x00004b6e       0x10 ./Src/syscall.o
- .debug_macro   0x00004b7e       0x10 ./Src/syscall.o
- .debug_macro   0x00004b8e       0x10 ./Src/syscall.o
- .debug_macro   0x00004b9e       0x1c ./Src/syscall.o
- .debug_macro   0x00004bba       0x52 ./Src/syscall.o
- .debug_macro   0x00004c0c       0x22 ./Src/syscall.o
- .debug_macro   0x00004c2e       0x10 ./Src/syscall.o
- .debug_macro   0x00004c3e       0x52 ./Src/syscall.o
- .debug_macro   0x00004c90       0xcf ./Src/syscall.o
- .debug_macro   0x00004d5f       0x1c ./Src/syscall.o
- .debug_macro   0x00004d7b       0x3d ./Src/syscall.o
- .debug_macro   0x00004db8       0x35 ./Src/syscall.o
- .debug_macro   0x00004ded      0x12c ./Src/syscall.o
- .debug_macro   0x00004f19       0x10 ./Src/syscall.o
- .debug_macro   0x00004f29      0x242 ./Src/syscall.o
- .debug_macro   0x0000516b       0x1c ./Src/syscall.o
- .debug_macro   0x00005187       0x10 ./Src/syscall.o
- .debug_macro   0x00005197      0x18a ./Src/syscall.o
- .debug_macro   0x00005321       0x16 ./Src/syscall.o
- .debug_macro   0x00005337       0xce ./Src/syscall.o
- .debug_macro   0x00005405      0x116 ./Src/sysmem.o
- .debug_macro   0x0000551b      0x23c ./Src/sysmem.o
- .debug_macro   0x00005757      0x2da ./Src/task_app.o
- .debug_macro   0x00005a31      0x2c6 ./Src/tasks.o
- .debug_macro   0x00005cf7       0x98 ./Src/tasks.o
- .debug_macro   0x00005d8f       0x17 ./Src/tasks.o
- .debug_macro   0x00005da6      0x128 ./Src/user_adc.o
- .debug_macro   0x00005ece       0xac ./Src/user_motor.o
- .debug_macro   0x00005f7a       0x8e ./Src/user_pwm.o
- .debug_macro   0x00006008      0x21e ./Src/user_timer.o
- .debug_macro   0x00006226      0x182 ./Src/user_uart.o
+ .debug_macro   0x00003a3e       0xe2 ./Src/lcd.o
+ .debug_macro   0x00003b20       0xa0 ./Src/lcd.o
+ .debug_macro   0x00003bc0      0x1a2 ./Src/list.o
+ .debug_macro   0x00003d62      0x280 ./Src/main_uart.o
+ .debug_macro   0x00003fe2       0x61 ./Src/main_uart.o
+ .debug_macro   0x00004043       0x16 ./Src/main_uart.o
+ .debug_macro   0x00004059       0x9e ./Src/main_uart.o
+ .debug_macro   0x000040f7      0x112 ./Src/main_uart.o
+ .debug_macro   0x00004209       0x10 ./Src/main_uart.o
+ .debug_macro   0x00004219       0x16 ./Src/main_uart.o
+ .debug_macro   0x0000422f       0x16 ./Src/main_uart.o
+ .debug_macro   0x00004245      0x146 ./Src/main_uart.o
+ .debug_macro   0x0000438b       0x3a ./Src/main_uart.o
+ .debug_macro   0x000043c5       0x80 ./Src/main_uart.o
+ .debug_macro   0x00004445      0x1ab ./Src/port.o
+ .debug_macro   0x000045f0      0x239 ./Src/queue.o
+ .debug_macro   0x00004829       0x41 ./Src/rtGetInf.o
+ .debug_macro   0x0000486a       0x41 ./Src/rtGetNaN.o
+ .debug_macro   0x000048ab       0x4d ./Src/rt_nonfinite.o
+ .debug_macro   0x000048f8      0x274 ./Src/syscall.o
+ .debug_macro   0x00004b6c       0x10 ./Src/syscall.o
+ .debug_macro   0x00004b7c       0x10 ./Src/syscall.o
+ .debug_macro   0x00004b8c       0x10 ./Src/syscall.o
+ .debug_macro   0x00004b9c       0x10 ./Src/syscall.o
+ .debug_macro   0x00004bac       0x1c ./Src/syscall.o
+ .debug_macro   0x00004bc8       0x52 ./Src/syscall.o
+ .debug_macro   0x00004c1a       0x22 ./Src/syscall.o
+ .debug_macro   0x00004c3c       0x10 ./Src/syscall.o
+ .debug_macro   0x00004c4c       0x52 ./Src/syscall.o
+ .debug_macro   0x00004c9e       0xcf ./Src/syscall.o
+ .debug_macro   0x00004d6d       0x1c ./Src/syscall.o
+ .debug_macro   0x00004d89       0x3d ./Src/syscall.o
+ .debug_macro   0x00004dc6       0x35 ./Src/syscall.o
+ .debug_macro   0x00004dfb      0x12c ./Src/syscall.o
+ .debug_macro   0x00004f27       0x10 ./Src/syscall.o
+ .debug_macro   0x00004f37      0x242 ./Src/syscall.o
+ .debug_macro   0x00005179       0x1c ./Src/syscall.o
+ .debug_macro   0x00005195       0x10 ./Src/syscall.o
+ .debug_macro   0x000051a5      0x18a ./Src/syscall.o
+ .debug_macro   0x0000532f       0x16 ./Src/syscall.o
+ .debug_macro   0x00005345       0xce ./Src/syscall.o
+ .debug_macro   0x00005413      0x116 ./Src/sysmem.o
+ .debug_macro   0x00005529      0x23c ./Src/sysmem.o
+ .debug_macro   0x00005765      0x2da ./Src/task_app.o
+ .debug_macro   0x00005a3f      0x2c6 ./Src/tasks.o
+ .debug_macro   0x00005d05       0x98 ./Src/tasks.o
+ .debug_macro   0x00005d9d       0x17 ./Src/tasks.o
+ .debug_macro   0x00005db4      0x128 ./Src/user_adc.o
+ .debug_macro   0x00005edc       0xac ./Src/user_motor.o
+ .debug_macro   0x00005f88       0x8e ./Src/user_pwm.o
+ .debug_macro   0x00006016      0x21e ./Src/user_timer.o
+ .debug_macro   0x00006234      0x182 ./Src/user_uart.o
 
 .debug_line     0x00000000     0xaff9
  .debug_line    0x00000000      0xa58 ./Src/EngTrModel.o
@@ -3483,29 +3483,29 @@ LOAD C:/ST/STM32CubeIDE_2.1.1/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.exte
  .debug_line    0x0000a7b9      0x7c5 ./Src/user_uart.o
  .debug_line    0x0000af7e       0x7b ./Startup/startup_stm32f103rbtx.o
 
-.debug_str      0x00000000    0x1a7bd
- .debug_str     0x00000000    0x1a7bd ./Src/EngTrModel.o
+.debug_str      0x00000000    0x1a7fe
+ .debug_str     0x00000000    0x1a7fe ./Src/EngTrModel.o
                                0x7700 (size before relaxing)
- .debug_str     0x0001a7bd     0x7278 ./Src/EngTrModel_data.o
- .debug_str     0x0001a7bd    0x124af ./Src/heap_4.o
- .debug_str     0x0001a7bd     0xf424 ./Src/lcd.o
- .debug_str     0x0001a7bd    0x108bb ./Src/list.o
- .debug_str     0x0001a7bd    0x13ecc ./Src/main_uart.o
- .debug_str     0x0001a7bd     0xf32a ./Src/port.o
- .debug_str     0x0001a7bd    0x13032 ./Src/queue.o
- .debug_str     0x0001a7bd     0x34e8 ./Src/rtGetInf.o
- .debug_str     0x0001a7bd     0x34c0 ./Src/rtGetNaN.o
- .debug_str     0x0001a7bd     0x356d ./Src/rt_nonfinite.o
- .debug_str     0x0001a7bd     0x98fe ./Src/syscall.o
- .debug_str     0x0001a7bd     0x76a9 ./Src/sysmem.o
- .debug_str     0x0001a7bd    0x1445a ./Src/task_app.o
- .debug_str     0x0001a7bd    0x13e3f ./Src/tasks.o
- .debug_str     0x0001a7bd     0xefb4 ./Src/user_adc.o
- .debug_str     0x0001a7bd     0x43d3 ./Src/user_motor.o
- .debug_str     0x0001a7bd     0x42bf ./Src/user_pwm.o
- .debug_str     0x0001a7bd    0x13252 ./Src/user_timer.o
- .debug_str     0x0001a7bd     0x7f14 ./Src/user_uart.o
- .debug_str     0x0001a7bd       0x76 ./Startup/startup_stm32f103rbtx.o
+ .debug_str     0x0001a7fe     0x7278 ./Src/EngTrModel_data.o
+ .debug_str     0x0001a7fe    0x124af ./Src/heap_4.o
+ .debug_str     0x0001a7fe     0xf465 ./Src/lcd.o
+ .debug_str     0x0001a7fe    0x108bb ./Src/list.o
+ .debug_str     0x0001a7fe    0x13f0d ./Src/main_uart.o
+ .debug_str     0x0001a7fe     0xf32a ./Src/port.o
+ .debug_str     0x0001a7fe    0x13032 ./Src/queue.o
+ .debug_str     0x0001a7fe     0x34e8 ./Src/rtGetInf.o
+ .debug_str     0x0001a7fe     0x34c0 ./Src/rtGetNaN.o
+ .debug_str     0x0001a7fe     0x356d ./Src/rt_nonfinite.o
+ .debug_str     0x0001a7fe     0x98fe ./Src/syscall.o
+ .debug_str     0x0001a7fe     0x76a9 ./Src/sysmem.o
+ .debug_str     0x0001a7fe    0x1449b ./Src/task_app.o
+ .debug_str     0x0001a7fe    0x13e3f ./Src/tasks.o
+ .debug_str     0x0001a7fe     0xeff5 ./Src/user_adc.o
+ .debug_str     0x0001a7fe     0x4414 ./Src/user_motor.o
+ .debug_str     0x0001a7fe     0x4300 ./Src/user_pwm.o
+ .debug_str     0x0001a7fe    0x13293 ./Src/user_timer.o
+ .debug_str     0x0001a7fe     0x7f55 ./Src/user_uart.o
+ .debug_str     0x0001a7fe       0x76 ./Startup/startup_stm32f103rbtx.o
 
 .comment        0x00000000       0x43
  .comment       0x00000000       0x43 ./Src/EngTrModel.o

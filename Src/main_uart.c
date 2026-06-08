@@ -48,7 +48,7 @@ int main(void)
 	USER_SystemClock_Config( );
 	USER_GPIO_Init( );
 	USER_GPIO_LED_Init( );
-	USER_USART2_Init( );
+	USER_USART3_Init( );
 	USER_ADC1_Init( );
 	USER_PWM4_Init( );
 	USER_TIM2_Init40ms( );
@@ -60,12 +60,12 @@ int main(void)
 
 	__asm volatile ("cpsie i");
 
-	USER_USART2_SendString("====================================\r\n");
-	USER_USART2_SendString("TRANSMISSION CONTROL SYSTEM - STM32F103RB\r\n");
-	USER_USART2_SendString("====================================\r\n");
-	USER_USART2_SendString("System initialized successfully!\r\n");
-	USER_USART2_SendString("Ready for FreeRTOS-based control loop.\r\n");
-	USER_USART2_SendString("====================================\r\n\r\n");
+	USER_USART3_SendString("====================================\r\n");
+	USER_USART3_SendString("TRANSMISSION CONTROL SYSTEM - STM32F103RB\r\n");
+	USER_USART3_SendString("====================================\r\n");
+	USER_USART3_SendString("System initialized successfully!\r\n");
+	USER_USART3_SendString("Ready for FreeRTOS-based control loop.\r\n");
+	USER_USART3_SendString("====================================\r\n\r\n");
 
 	/* ===== FreeRTOS Task Creation ===== */
 	vCreateAllTasks();
