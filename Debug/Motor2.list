@@ -15372,7 +15372,7 @@ USART3->CR2&=~USART_CR2_STOP;//Step 3 1 Stop bit
  8006690:	6113      	str	r3, [r2, #16]
 USART3->BRR  = USARTDIV;//Step 5 Desired baud rate
  8006692:	4b22      	ldr	r3, [pc, #136]	@ (800671c <USER_USART3_Init+0xcc>)
- 8006694:	f640 5205 	movw	r2, #3333	@ 0xd05
+ 8006694:	f44f 728b 	mov.w	r2, #278	@ 0x116
  8006698:	609a      	str	r2, [r3, #8]
 USART3->CR1|=  USART_CR1_TE;//Step 6 Transmitter enabled
  800669a:	4b20      	ldr	r3, [pc, #128]	@ (800671c <USER_USART3_Init+0xcc>)

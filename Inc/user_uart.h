@@ -5,7 +5,7 @@
 #include <stdint.h>
 
 int _write(int file, char *ptr, int len);
-#define USARTDIV        0xD05//				    9600 baud rate at 32 MHz (USART3 on APB1)
+#define USARTDIV        0x116//				    115200 baud rate at 32 MHz (USART3 on APB1)
 #define USART_CR1_UE    ( 0x1UL << 13U )
 #define USART_CR1_M     ( 0x1UL << 12U )
 #define USART_CR1_TE    ( 0x1UL <<  3U )
